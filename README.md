@@ -94,18 +94,121 @@ Because there are no frameworks or build steps, deployment is immediate:
 
 ---
 
+## 📝 Editing ProtoSem Weeks (Owner-Only CMS)
+
+The weekly cards in the **PRICE ProtoSem** section ("20-Week Innovation Highway") are editable exclusively by the portfolio owner via a hidden, zero-backend retro-futurism CMS.
+
+### 🔑 Step 1: Create a Fine-Grained GitHub Token
+
+1. Go to your GitHub account: **Settings** > **Developer Settings** > **Personal access tokens** > **Fine-grained tokens**.
+2. Click **Generate new token**.
+3. Fill in:
+   - **Token name**: `ProtoSem Portfolio CMS`
+   - **Expiration**: Select 30, 60, or 90 days.
+   - **Repository access**: Select **Only select repositories** and pick `mithradharshini/mithradharshini-portfolio`.
+   - **Permissions**: Under **Repository permissions**, find **Contents** and set it to **Read and write**.
+4. Click **Generate token** and copy your token (`github_pat_...`).
+
+> 🔒 **Security Notice**: Your token is stored **STRICTLY in your personal browser's `localStorage`**. It is never hardcoded, never committed to Git, and never sent to any third-party server. All network calls go directly to `api.github.com`.
+
+---
+
+### 🖥️ Step 2: Open Admin Mode
+
+1. Open your portfolio in your browser and append `#admin` to the URL:  
+   👉 **`https://mithradharshini.github.io/mithradharshini-portfolio/#admin`**  
+   *(Alternative triggers: press `Ctrl + Shift + P` anywhere on the site, or click the subtle `•` bullet in the footer)*
+2. Paste your GitHub token into the cyber authorization prompt and click **AUTHORIZE SESSION ✦**.
+3. Once verified against GitHub, the **ADMIN MODE** top bar will appear and an **`[✎ EDIT]`** button will become visible on every week card.
+
+---
+
+### ✍️ Step 3: Edit Journal Entries & Upload Photos
+
+1. Click **`[✎ EDIT]`** on any week card.
+2. In the editor drawer:
+   - **Title**: Update the weekly deliverable title.
+   - **Status**: Toggle between `Completed`, `In progress`, or `Upcoming`.
+   - **Timeframe / Date Range**: Enter an optional date range (e.g. `12 Jan - 18 Jan`).
+   - **Card Summary**: Brief 1-2 sentence overview for the card collapsed view.
+   - **Weekly Reflection (Details)**: Write your comprehensive field notes. Supports safe formatting:
+     - Paragraphs (double newline)
+     - Line breaks (single newline)
+     - Bullet points (`- Item`)
+     - Bold text (`**bold text**`)
+     - Italic text (`*italic text*`)
+     - Section headings (`### Heading`)
+     - Click the **`PREVIEW`** tab to see real-time formatted rendering.
+   - **Field Photos**:
+     - Drag & drop or browse photos into the upload zone.
+     - **Automatic Client-Side Compression**: Images are automatically resized to max 1600px, converted to WebP at ~80% quality, and have metadata stripped right in your browser before upload (files > 8MB are safely guarded).
+     - Add a **Caption** (shown under the thumbnail and in the Lightbox) and **Alt text** (for accessibility).
+     - Use `[▲]` / `[▼]` to reorder images, or `[🗑]` to delete them.
+3. **Autosave Protection**: An in-progress draft is continuously autosaved to your browser's `localStorage`, protecting your write-up if your tab closes unexpectedly.
+
+---
+
+### 🚀 Step 4: Publish to GitHub Pages
+
+1. Click **`✦ PUBLISH TO GITHUB PAGES`**.
+2. The CMS directly performs:
+   - Uploads new compressed photos into `assets/weeks/week-XX/`.
+   - Updates `data/weeks.json` with your reflection, timeframe, and image metadata in an atomic commit on the `main` branch.
+   - Immediately re-renders your local view so you can review the result.
+3. **Propagation Time**: GitHub Pages automatically rebuilds and deploys your updates live across the globe in approximately **1 to 2 minutes**.
+
+---
+
+### 🛟 Fallback Method: Direct GitHub Web Editing
+
+If you ever wish to update weeks without using the in-browser Admin CMS:
+
+1. **Edit Text & Metadata**:
+   - Navigate to [`data/weeks.json`](data/weeks.json) on GitHub.
+   - Click the **✎ Edit this file** button.
+   - Update the `details`, `dateRange`, `summary`, or `status` properties for the desired week.
+   - Commit directly to `main`.
+2. **Add Photos Manually**:
+   - Navigate to `assets/weeks/` on GitHub (create folder `week-XX` if needed).
+   - Click **Add file** > **Upload files** and upload your images.
+   - Reference the path in `data/weeks.json` inside the week's `images` array:
+     ```json
+     "images": [
+       {
+         "src": "assets/weeks/week-01/sensor-board.webp",
+         "alt": "ProtoSem sensor board prototype",
+         "caption": "Hardware checkout testbed"
+       }
+     ]
+     ```
+
+---
+
+### ✅ Public View & Regression Checklist
+
+- **Public Visitors**: Normal visitors see a clean, read-only experience with zero admin buttons, zero token requests, and zero admin hints.
+- **Empty Weeks**: Any week with no `details` and no `images` renders identically to the original site.
+- **Populated Weeks**: When expanded, displays the timeframe badge, summary, safe markdown write-up, and a responsive thumbnail grid.
+- **Accessible Lightbox**: Clicking any thumbnail opens a keyboard-navigable Lightbox (`Esc` closes, `ArrowLeft` / `ArrowRight` navigates, focus trapped, returns focus to thumbnail upon close).
+
+---
+
 ## 📂 File Architecture
 
 ```
 mithradharshini-portfolio/
-├── index.html              # Main semantic HTML structure & HUD
-├── README.md               # Documentation & setup guide
+├── index.html              # Semantic HTML structure & HUD telemetry
+├── README.md               # Documentation, setup & ProtoSem editing guide
 ├── css/
-│   └── style.css           # Complete Retro Futurism CSS system
+│   └── style.css           # Retro Futurism styling, lightbox, and CMS UI
+├── data/
+│   └── weeks.json          # Single source of truth for 20 ProtoSem weeks
 ├── js/
-│   ├── content.js          # Single source of truth (all editable content)
-│   └── main.js             # SVG highway math, DOM renderer, and interactions
+│   ├── content.js          # Static portfolio data & fallback dataset
+│   ├── main.js             # SVG highway math, DOM renderer, lightbox & admin loader
+│   └── admin.js            # Owner-only CMS engine (GitHub REST API client)
 └── assets/
     ├── favicon.svg         # Retro neon rocket icon
-    └── resume.html         # ATS-optimized printable resume
+    ├── resume.html         # ATS-optimized printable resume
+    └── weeks/              # Weekly field photo repository (week-01/, week-02/, ...)
 ```

@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initEffectsToggle();
   initProtoSemTimeline();
   initContactForm();
+  initAdminModeTrigger();
 });
 
 /* ==========================================================================
@@ -304,15 +305,86 @@ function initEffectsToggle() {
 /* ==========================================================================
    5. PRICE PROTOSEM 20-WEEK TIMELINE & WINDING SVG HIGHWAY
    ========================================================================== */
-function initProtoSemTimeline() {
-  const data = portfolioData.protosem;
+
+/**
+ * Safe HTML Escaping for user-generated strings
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Safe Markdown-to-HTML parser (zero-dependency, XSS-safe)
+ * Supports: bold (**text**), italics (*text*), safe links, headers (###), lists (- or 1.), line breaks
+ */
+function formatMarkdownSafe(rawMd) {
+  if (!rawMd) return '';
+  let text = escapeHtml(rawMd);
+
+  // Headers (### )
+  text = text.replace(/^### (.*$)/gim, '<h5 class="week-md-h5">$1</h5>');
+
+  // Bold & Italic
+  text = text.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+  text = text.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+  // Safe Links: [label](https://... or /assets/...)
+  text = text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+|assets\/[^\s)]+|\/[^\s)]+)\)/gim,
+    '<a href="$2" target="_blank" rel="noopener noreferrer" class="retro-inline-link">$1</a>'
+  );
+
+  // Unordered list items: lines starting with "- " or "* "
+  text = text.replace(/^\s*[-*]\s+(.*)$/gim, '<li class="week-md-li">$1</li>');
+  // Group adjacent <li> into <ul>
+  text = text.replace(/(<li class="week-md-li">[\s\S]*?<\/li>)(?!\s*<li)/gim, '<ul class="week-md-ul">$1</ul>');
+
+  // Paragraph splitting on double newlines
+  const segments = text.split(/\n{2,}/);
+  text = segments.map(seg => {
+    seg = seg.trim();
+    if (!seg) return '';
+    if (seg.startsWith('<h5') || seg.startsWith('<ul') || seg.startsWith('<ol')) {
+      return seg;
+    }
+    return `<p class="week-md-p">${seg.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+
+  return text;
+}
+
+/**
+ * Main ProtoSem 20-Week Timeline Renderer
+ */
+async function initProtoSemTimeline() {
   const container = document.getElementById('timeline-nodes-container');
   if (!container) return;
 
-  container.innerHTML = '';
-
+  const data = portfolioData.protosem;
   const milestones = data.milestones || [];
-  const weeks = data.weeks || [];
+  let weeks = data.weeks || [];
+
+  // Attempt dynamic fetch from data/weeks.json with cache-busting
+  try {
+    const res = await fetch(`data/weeks.json?v=${Date.now()}`);
+    if (res.ok) {
+      const remoteWeeks = await res.json();
+      if (Array.isArray(remoteWeeks) && remoteWeeks.length > 0) {
+        weeks = remoteWeeks;
+        portfolioData.protosem.weeks = weeks; // Keep in-memory data in sync
+      }
+    }
+  } catch (err) {
+    console.warn("ProtoSem: Offline/local mode, using fallback portfolioData.protosem.weeks", err);
+  }
+
+  container.innerHTML = '';
 
   // Track which milestones have been rendered
   const renderedMilestones = new Set();
@@ -327,7 +399,6 @@ function initProtoSemTimeline() {
         banner.dataset.phase = m.phase;
         banner.id = `milestone-${m.id}`;
 
-        // Milestone alternating sides: even index label on left, odd index label on right
         const isLabelLeft = mIdx % 2 === 0;
 
         banner.innerHTML = `
@@ -366,6 +437,11 @@ function initProtoSemTimeline() {
     const isFirstCard = index === 0;
     const nextWeekNum = item.week < 20 ? item.week + 1 : null;
 
+    // Check optional write-up details, dateRange, and images
+    const hasDateRange = Boolean(item.dateRange && item.dateRange.trim());
+    const hasDetails = Boolean(item.details && item.details.trim());
+    const hasImages = Array.isArray(item.images) && item.images.length > 0;
+
     nodeRow.innerHTML = `
       <!-- Connector line between node and card -->
       <div class="node-connector-line" aria-hidden="true"></div>
@@ -378,17 +454,58 @@ function initProtoSemTimeline() {
            tabindex="0" 
            role="button" 
            aria-expanded="${isFirstCard ? 'true' : 'false'}"
-           aria-label="Week ${item.week}: ${item.title}">
+           aria-label="Week ${item.week}: ${escapeHtml(item.title)}">
         
         <div class="card-top-row">
           <span class="week-code mono-text">WEEK ${item.week.toString().padStart(2, '0')} · ${item.phaseLabel}</span>
           <span class="status-badge ${statusClass} mono-text">${item.status}</span>
         </div>
 
-        <h4 class="card-week-title">${item.title}</h4>
+        <h4 class="card-week-title">${escapeHtml(item.title)}</h4>
 
         <div class="card-details-panel">
-          <p class="body-text">${item.summary || 'Ongoing exploration of intelligent commerce systems.'}</p>
+          ${hasDateRange ? `
+            <div class="week-date-range mono-text">
+              <span class="range-badge">TIMEFRAME:</span>
+              <span class="range-value">${escapeHtml(item.dateRange)}</span>
+            </div>
+          ` : ''}
+
+          <p class="body-text">${escapeHtml(item.summary || 'Ongoing exploration of intelligent commerce systems.')}</p>
+
+          ${hasDetails ? `
+            <div class="week-expanded-details">
+              <div class="details-divider" aria-hidden="true"></div>
+              <div class="details-body body-text">
+                ${formatMarkdownSafe(item.details)}
+              </div>
+            </div>
+          ` : ''}
+
+          ${hasImages ? `
+            <div class="week-images-grid">
+              ${item.images.map((img, imgIdx) => {
+                const imgSrc = img.src || img.url || '';
+                return `
+                <figure class="week-image-figure">
+                  <button type="button" 
+                          class="week-image-thumb-btn" 
+                          data-week="${item.week}" 
+                          data-img-idx="${imgIdx}" 
+                          aria-label="View full visual: ${escapeHtml(img.caption || img.alt || 'Week ' + item.week + ' visual')}">
+                    <img src="${escapeHtml(imgSrc)}" 
+                         alt="${escapeHtml(img.alt || 'ProtoSem Week ' + item.week + ' visual')}" 
+                         loading="lazy" 
+                         width="320" 
+                         height="240" 
+                         class="week-image-thumb" />
+                    <span class="zoom-indicator mono-text">✦ ZOOM</span>
+                  </button>
+                  ${img.caption ? `<figcaption class="week-image-caption mono-text">${escapeHtml(img.caption)}</figcaption>` : ''}
+                </figure>
+              `;}).join('')}
+            </div>
+          ` : ''}
         </div>
 
         <div class="card-bottom-actions mono-text">
@@ -418,6 +535,10 @@ function initProtoSemTimeline() {
     };
 
     cardEl.addEventListener('click', (e) => {
+      // Do not toggle card if user clicked an image thumbnail or an admin edit button
+      if (e.target.closest('.week-image-thumb-btn') || e.target.closest('.admin-card-edit-btn')) {
+        return;
+      }
       // If user clicked the "NEXT WEEK ›" link, navigate to next week card
       if (e.target.closest('.next-week-link')) {
         e.preventDefault();
@@ -443,10 +564,32 @@ function initProtoSemTimeline() {
     });
 
     cardEl.addEventListener('keydown', (e) => {
+      if (e.target.closest('.week-image-thumb-btn') || e.target.closest('.admin-card-edit-btn')) {
+        return;
+      }
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         toggleExpand();
       }
+    });
+
+    // Wire up image thumbnail clicks to open Lightbox
+    const thumbBtns = nodeRow.querySelectorAll('.week-image-thumb-btn');
+    thumbBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const imgIdx = parseInt(btn.dataset.imgIdx, 10) || 0;
+        openRetroLightbox(item.images, imgIdx, item.week, item.title, btn);
+      });
+    });
+
+    // Re-draw highway when thumbnails load to ensure accurate geometry
+    const thumbImgs = nodeRow.querySelectorAll('.week-image-thumb');
+    thumbImgs.forEach(img => {
+      img.addEventListener('load', () => {
+        drawWindingHighway();
+      });
     });
 
     container.appendChild(nodeRow);
@@ -493,6 +636,222 @@ function initProtoSemTimeline() {
       setTimeout(drawWindingHighway, 150);
     });
   });
+
+  // If Admin Mode engine is currently active, re-inject edit buttons
+  if (window.ProtoSemAdmin && typeof window.ProtoSemAdmin.refreshCardButtons === 'function') {
+    window.ProtoSemAdmin.refreshCardButtons();
+  }
+}
+
+// Make initProtoSemTimeline accessible on window for seamless admin re-renders
+window.initProtoSemTimeline = initProtoSemTimeline;
+
+/* ==========================================================================
+   RETRO LIGHTBOX ENGINE (ZERO-DEPENDENCY, ACCESSIBLE)
+   ========================================================================== */
+let currentLightboxImages = [];
+let currentLightboxIndex = 0;
+let lastFocusedElement = null;
+
+function openRetroLightbox(images, startIndex, weekNum, weekTitle, triggerEl) {
+  if (!images || images.length === 0) return;
+  currentLightboxImages = images;
+  currentLightboxIndex = startIndex >= 0 && startIndex < images.length ? startIndex : 0;
+  lastFocusedElement = triggerEl || document.activeElement;
+
+  let lightbox = document.getElementById('retro-lightbox');
+  if (!lightbox) {
+    lightbox = document.createElement('div');
+    lightbox.id = 'retro-lightbox';
+    lightbox.className = 'retro-lightbox';
+    lightbox.setAttribute('role', 'dialog');
+    lightbox.setAttribute('aria-modal', 'true');
+    lightbox.setAttribute('aria-label', 'Image preview modal');
+    lightbox.innerHTML = `
+      <div class="retro-lightbox-backdrop" aria-hidden="true"></div>
+      <div class="retro-lightbox-dialog">
+        <div class="retro-lightbox-header mono-text">
+          <div class="lb-header-info">
+            <span class="lb-tag" id="lb-week-badge">WEEK 01</span>
+            <span class="lb-title" id="lb-week-title"></span>
+          </div>
+          <div class="lb-header-controls">
+            <span class="lb-counter" id="lb-counter">[ 01 / 01 ]</span>
+            <button type="button" class="lb-close-btn mono-text" id="lb-close-btn" aria-label="Close image preview">
+              <span>[ESC ×]</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="retro-lightbox-stage">
+          <button type="button" class="lb-nav-btn prev mono-text" id="lb-prev-btn" aria-label="Previous image">‹</button>
+          <div class="lb-image-wrapper">
+            <img src="" alt="" id="lb-main-img" class="lb-img" />
+          </div>
+          <button type="button" class="lb-nav-btn next mono-text" id="lb-next-btn" aria-label="Next image">›</button>
+        </div>
+
+        <div class="retro-lightbox-footer mono-text">
+          <p id="lb-caption" class="lb-caption-text"></p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(lightbox);
+
+    // Click outside to close
+    lightbox.querySelector('.retro-lightbox-backdrop').addEventListener('click', closeRetroLightbox);
+    lightbox.querySelector('#lb-close-btn').addEventListener('click', closeRetroLightbox);
+
+    // Nav buttons
+    lightbox.querySelector('#lb-prev-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepRetroLightbox(-1);
+    });
+    lightbox.querySelector('#lb-next-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepRetroLightbox(1);
+    });
+
+    // Keyboard handlers
+    window.addEventListener('keydown', (e) => {
+      const lb = document.getElementById('retro-lightbox');
+      if (!lb || !lb.classList.contains('active')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeRetroLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        stepRetroLightbox(-1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        stepRetroLightbox(1);
+      } else if (e.key === 'Tab') {
+        const focusables = lb.querySelectorAll('button:not([disabled])');
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+  }
+
+  // Update labels
+  document.getElementById('lb-week-badge').textContent = `WEEK ${weekNum.toString().padStart(2, '0')}`;
+  document.getElementById('lb-week-title').textContent = weekTitle || '';
+
+  renderLightboxSlide();
+  lightbox.classList.add('active');
+  document.body.classList.add('lightbox-open');
+  const closeBtn = document.getElementById('lb-close-btn');
+  if (closeBtn) closeBtn.focus();
+}
+
+function renderLightboxSlide() {
+  const images = currentLightboxImages;
+  const idx = currentLightboxIndex;
+  const imgData = images[idx];
+  if (!imgData) return;
+
+  const mainImg = document.getElementById('lb-main-img');
+  const caption = document.getElementById('lb-caption');
+  const counter = document.getElementById('lb-counter');
+  const prevBtn = document.getElementById('lb-prev-btn');
+  const nextBtn = document.getElementById('lb-next-btn');
+
+  mainImg.src = imgData.src || imgData.url || '';
+  mainImg.alt = imgData.alt || imgData.caption || 'ProtoSem visual';
+  caption.textContent = imgData.caption || imgData.alt || '';
+  caption.style.display = (imgData.caption || imgData.alt) ? 'block' : 'none';
+  counter.textContent = `[ ${(idx + 1).toString().padStart(2, '0')} / ${images.length.toString().padStart(2, '0')} ]`;
+
+  if (images.length > 1) {
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+  } else {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+  }
+}
+
+function stepRetroLightbox(delta) {
+  const total = currentLightboxImages.length;
+  if (total <= 1) return;
+  currentLightboxIndex = (currentLightboxIndex + delta + total) % total;
+  renderLightboxSlide();
+}
+
+function closeRetroLightbox() {
+  const lightbox = document.getElementById('retro-lightbox');
+  if (lightbox) {
+    lightbox.classList.remove('active');
+    document.body.classList.remove('lightbox-open');
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      lastFocusedElement.focus();
+    }
+  }
+}
+
+/* ==========================================================================
+   ADMIN ENGINE LOADER (LAZY-LOADED ON DEMAND)
+   ========================================================================== */
+function initAdminModeTrigger() {
+  const hasAdminQuery = window.location.search.includes('admin=1') || 
+                         window.location.hash === '#admin' || 
+                         window.location.hash.includes('admin');
+  const hasStoredToken = Boolean(localStorage.getItem('protosem_admin_token'));
+
+  if (hasAdminQuery || hasStoredToken) {
+    loadAdminEngine(hasAdminQuery);
+  }
+
+  // Listen for hash changes to #admin
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#admin') {
+      loadAdminEngine(true);
+    }
+  });
+
+  // Secret keyboard combo: Ctrl + Shift + P
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'P' || e.key === 'p')) {
+      e.preventDefault();
+      loadAdminEngine(true);
+    }
+  });
+
+  // Secret footer trigger
+  const secretTrigger = document.getElementById('admin-secret-trigger');
+  if (secretTrigger) {
+    secretTrigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadAdminEngine(true);
+    });
+  }
+}
+
+function loadAdminEngine(forceOpenPrompt = false) {
+  if (window.ProtoSemAdmin) {
+    window.ProtoSemAdmin.init(forceOpenPrompt);
+    return;
+  }
+
+  if (document.getElementById('protosem-admin-script')) return;
+
+  const script = document.createElement('script');
+  script.id = 'protosem-admin-script';
+  script.src = 'js/admin.js';
+  script.onload = () => {
+    if (window.ProtoSemAdmin) {
+      window.ProtoSemAdmin.init(forceOpenPrompt);
+    }
+  };
+  document.head.appendChild(script);
 }
 
 /**
