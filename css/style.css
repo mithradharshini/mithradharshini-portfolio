@@ -970,11 +970,22 @@ body {
 /* ==========================================================================
    SECTION 4: PRICE PROTOSEM (FLAGSHIP SECTION)
    ========================================================================== */
+.protosem-panel {
+  padding: 0;
+  border-radius: var(--panel-radius);
+  border: 1px solid var(--border-neon-cyan);
+  background: var(--bg-panel-dark);
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 30px rgba(18, 6, 43, 0.8);
+}
+
 .protosem-intro-card {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  padding: 2rem;
+  padding: 2.25rem 2rem;
   margin-bottom: 2.5rem;
 }
 
@@ -989,31 +1000,37 @@ body {
 .tag-eyebrow {
   font-size: 0.75rem;
   letter-spacing: 2px;
+  color: var(--neon-cyan);
 }
 
 .protosem-title {
-  font-size: 2.4rem;
-  margin: 0.25rem 0;
+  font-size: 2.5rem;
+  margin: 0.35rem 0 0.2rem;
 }
 
 .role-line {
   font-size: 1.15rem;
+  color: var(--neon-magenta);
   margin-bottom: 0.4rem;
 }
 
 .programme-line {
-  max-width: 600px;
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  max-width: 650px;
+  color: var(--text-muted);
 }
 
 .protosem-meta-box {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  background: rgba(18, 6, 43, 0.7);
+  gap: 0.45rem;
+  background: rgba(18, 6, 43, 0.8);
   border: 1px solid var(--border-neon-magenta);
   padding: 0.85rem 1.25rem;
   border-radius: 8px;
-  min-width: 220px;
+  min-width: 230px;
+  box-shadow: 0 0 15px rgba(255, 46, 151, 0.15);
 }
 .meta-row {
   display: flex;
@@ -1025,7 +1042,8 @@ body {
 .meta-row .val { color: var(--neon-magenta); font-weight: 700; }
 
 .protosem-desc-grid {
-  line-height: 1.7;
+  line-height: 1.75;
+  font-size: 0.95rem;
 }
 
 .disciplines-label {
@@ -1033,14 +1051,14 @@ body {
   letter-spacing: 1.5px;
 }
 
-/* Timeline Header & Filters */
+/* Timeline Header Row & Compact Stat Filters */
 .timeline-header-row {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   border-top: 1px solid var(--border-subtle);
-  padding-top: 2rem;
-  margin-bottom: 2.5rem;
+  padding-top: 2.25rem;
+  margin-bottom: 3rem;
 }
 @media (min-width: 768px) {
   .timeline-header-row {
@@ -1051,8 +1069,9 @@ body {
 }
 
 .highway-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--text-cream);
+  margin-bottom: 0.25rem;
 }
 
 .timeline-filters-bar {
@@ -1061,6 +1080,10 @@ body {
   overflow-x: auto;
   padding-bottom: 0.4rem;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.timeline-filters-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-btn {
@@ -1087,13 +1110,13 @@ body {
   font-weight: 700;
 }
 .filter-count {
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-/* Timeline Container & SVG Path */
+/* Timeline Highway Container & SVG Centerline */
 .timeline-highway-container {
   position: relative;
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   min-height: 600px;
 }
 
@@ -1102,7 +1125,7 @@ body {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 140px;
+  width: 160px;
   height: 100%;
   z-index: 1;
   pointer-events: none;
@@ -1118,8 +1141,8 @@ body {
 .path-glow {
   stroke: var(--neon-magenta);
   stroke-width: 8;
-  opacity: 0.6;
-  filter: drop-shadow(0 0 8px var(--neon-magenta));
+  opacity: 0.55;
+  filter: drop-shadow(0 0 10px var(--neon-magenta));
 }
 .path-core {
   stroke: #FFFFFF;
@@ -1131,55 +1154,142 @@ body {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 3.5rem;
+  gap: 3rem;
 }
 
-/* Phase Header Milestone Blocks */
+/* ==========================================================================
+   5 PHASE HEADER MILESTONE BLOCKS
+   ========================================================================== */
 .phase-milestone-block {
   width: 100%;
   position: relative;
   z-index: 5;
-  margin: 1.5rem 0 0.5rem;
+  margin: 2.5rem 0 1.5rem;
+}
+.phase-milestone-block.filtered-out {
+  display: none;
 }
 
-.milestone-content {
-  display: flex;
-  flex-direction: column;
+.milestone-grid {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
   align-items: center;
-  gap: 0.35rem;
-  text-align: center;
-}
-@media (min-width: 768px) {
-  .milestone-content {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 2rem;
-    align-items: center;
-  }
-  .milestone-title-side { text-align: right; }
-  .milestone-badge-side { text-align: center; }
-  .milestone-desc-side { text-align: left; }
+  gap: 1.25rem;
+  width: 100%;
 }
 
-.phase-pill-badge {
+.milestone-grid.label-left .milestone-label-card {
+  grid-column: 1;
+  text-align: right;
+}
+.milestone-grid.label-left .milestone-node-pin {
+  grid-column: 2;
+}
+.milestone-grid.label-left .milestone-descriptor-card {
+  grid-column: 3;
+  text-align: left;
+}
+
+.milestone-grid.label-right .milestone-descriptor-card {
+  grid-column: 1;
+  text-align: right;
+}
+.milestone-grid.label-right .milestone-node-pin {
+  grid-column: 2;
+}
+.milestone-grid.label-right .milestone-label-card {
+  grid-column: 3;
+  text-align: left;
+}
+
+.milestone-label-card {
   background: var(--bg-panel);
   border: 1px solid var(--neon-cyan);
-  color: var(--neon-cyan);
-  padding: 0.4rem 1.4rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+.phase-mini-tag {
   display: inline-block;
-  white-space: nowrap;
+  font-size: 0.68rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--neon-cyan);
+  margin-bottom: 0.35rem;
+}
+.milestone-heading {
+  font-size: 1.15rem;
+  color: var(--text-cream);
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
-.milestone-desc-side {
+.milestone-node-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 2px solid var(--neon-yellow);
+  margin: 0 auto;
+  color: var(--neon-yellow);
+  font-size: 0.85rem;
+  box-shadow: 0 0 14px var(--neon-yellow);
+  z-index: 3;
+}
+
+.milestone-descriptor-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+}
+.descriptor-eyebrow {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--neon-orange);
+  margin-bottom: 0.25rem;
+}
+.descriptor-text {
+  font-size: 0.85rem;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
-/* Alternating Week Cards */
+/* Mobile Milestone collapse */
+@media (max-width: 767px) {
+  .milestone-grid, 
+  .milestone-grid.label-left, 
+  .milestone-grid.label-right {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-left: 60px;
+    gap: 0.75rem;
+    position: relative;
+  }
+  .milestone-grid.label-left .milestone-label-card,
+  .milestone-grid.label-right .milestone-label-card,
+  .milestone-grid.label-left .milestone-descriptor-card,
+  .milestone-grid.label-right .milestone-descriptor-card {
+    text-align: left;
+    grid-column: auto;
+  }
+  .milestone-node-pin {
+    position: absolute;
+    left: 28px;
+    top: 18px;
+    transform: translateX(-50%);
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   ALTERNATING WEEK CARDS & CONNECTORS
+   ========================================================================== */
 .timeline-node-row {
   display: flex;
   width: 100%;
@@ -1187,12 +1297,11 @@ body {
   align-items: center;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
 .timeline-node-row.filtered-out {
   display: none;
 }
 
-/* Desktop layout: Week 01 Left, Week 02 Right */
+/* Desktop alternating: Week 01 Left, Week 02 Right */
 @media (min-width: 768px) {
   .timeline-node-row.left {
     justify-content: flex-start;
@@ -1203,17 +1312,19 @@ body {
 }
 
 @media (max-width: 767px) {
-  .timeline-node-row, .timeline-node-row.left, .timeline-node-row.right {
-    justify-content: flex-end;
+  .timeline-node-row, 
+  .timeline-node-row.left, 
+  .timeline-node-row.right {
+    justify-content: flex-start;
     padding-left: 60px;
   }
 }
 
-/* Circular Node Marker on the centerline */
+/* Numbered Circular Node sitting on the Centerline */
 .timeline-marker-node {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: var(--bg-deep);
   border: 3px solid var(--neon-cyan);
   border-radius: 50%;
@@ -1224,23 +1335,59 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--neon-cyan);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  z-index: 3;
+  z-index: 4;
   box-shadow: 0 0 12px var(--neon-cyan);
-  transition: transform 0.2s;
+  transition: all 0.25s ease;
 }
-.timeline-node-row:hover .timeline-marker-node {
-  transform: translate(-50%, -50%) scale(1.2);
+
+.timeline-node-row:hover .timeline-marker-node,
+.timeline-node-row:focus-within .timeline-marker-node {
+  transform: translate(-50%, -50%) scale(1.15);
   border-color: var(--neon-magenta);
   color: var(--neon-magenta);
-  box-shadow: 0 0 16px var(--neon-magenta);
+  box-shadow: 0 0 18px var(--neon-magenta);
 }
 
 @media (max-width: 767px) {
   .timeline-marker-node {
     left: 28px;
   }
+}
+
+/* Connecting Line between Card and Center Node */
+.node-connector-line {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  background: var(--border-neon-magenta);
+  z-index: 2;
+  transition: all 0.25s ease;
+}
+
+@media (min-width: 768px) {
+  .timeline-node-row.left .node-connector-line {
+    right: calc(50% - 17px);
+    width: 28px;
+  }
+  .timeline-node-row.right .node-connector-line {
+    left: calc(50% - 17px);
+    width: 28px;
+  }
+}
+
+@media (max-width: 767px) {
+  .node-connector-line {
+    left: 28px;
+    width: 32px;
+  }
+}
+
+.timeline-node-row:hover .node-connector-line,
+.timeline-node-row:focus-within .node-connector-line {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px var(--neon-cyan);
 }
 
 /* Week Card Enclosure */
@@ -1250,12 +1397,28 @@ body {
   border-radius: 14px;
   padding: 1.4rem 1.6rem;
   width: 100%;
-  max-width: 440px;
-  box-shadow: 0 6px 25px rgba(0,0,0,0.35);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   outline: none;
+  position: relative;
+  z-index: 3;
 }
+
+@media (min-width: 768px) {
+  .timeline-card {
+    width: calc(50% - 44px);
+    max-width: 440px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  .timeline-card {
+    width: calc(50% - 36px);
+    max-width: 360px;
+    padding: 1.25rem;
+  }
+}
+
 .timeline-card:hover, .timeline-card:focus-visible {
   border-color: var(--neon-cyan);
   box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
@@ -1277,6 +1440,7 @@ body {
 .week-code {
   font-size: 0.75rem;
   color: var(--neon-cyan);
+  letter-spacing: 1px;
 }
 
 .status-badge {
@@ -1302,11 +1466,11 @@ body {
 }
 
 .card-week-title {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-cream);
   line-height: 1.4;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .card-details-panel {
@@ -1317,9 +1481,9 @@ body {
   color: var(--text-muted);
 }
 .timeline-card.expanded .card-details-panel {
-  max-height: 200px;
+  max-height: 250px;
   margin-top: 0.75rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
   padding-top: 0.75rem;
 }
 
@@ -1327,16 +1491,38 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.6rem;
+  margin-top: 0.8rem;
   font-size: 0.75rem;
+}
+
+.next-week-link {
   color: var(--neon-orange);
+  text-decoration: none;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s;
 }
-.toggle-icon {
-  transition: transform 0.25s ease;
+.next-week-link:hover {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 8px rgba(255, 209, 102, 0.4);
 }
-.timeline-card.expanded .toggle-icon {
-  transform: rotate(90deg);
+.next-arrow {
+  font-size: 1rem;
+  line-height: 1;
 }
+
+.final-milestone-tag {
+  color: var(--neon-yellow);
+  font-weight: 700;
+}
+
+.toggle-indicator {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
 
 /* ==========================================================================
    SECTION 5: LEADERSHIP (CREW BADGES)

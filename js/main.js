@@ -307,34 +307,49 @@ function initProtoSemTimeline() {
   if (!container) return;
 
   container.innerHTML = '';
-  let activePhase = 0;
 
-  // Render all 20 weeks with phase headers
-  data.weeks.forEach((item, index) => {
-    // If transitioning to a new phase, inject Phase Header Banner with paired descriptor
-    if (item.phase !== activePhase) {
-      activePhase = item.phase;
-      const phaseInfo = data.phases.find(p => p.phaseId === activePhase);
+  const milestones = data.milestones || [];
+  const weeks = data.weeks || [];
 
-      const banner = document.createElement('div');
-      banner.className = 'phase-milestone-block mono-text';
-      banner.dataset.phase = activePhase;
-      banner.innerHTML = `
-        <div class="milestone-content">
-          <div class="milestone-title-side neon-cyan-text">${phaseInfo ? phaseInfo.milestone : item.phaseLabel}</div>
-          <div class="milestone-badge-side">
-            <span class="phase-pill-badge">${item.phaseLabel}</span>
+  // Track which milestones have been rendered
+  const renderedMilestones = new Set();
+
+  weeks.forEach((item, index) => {
+    // Check if any milestone should appear before this week
+    milestones.forEach((m, mIdx) => {
+      if (m.beforeWeek === item.week && !renderedMilestones.has(m.id)) {
+        renderedMilestones.add(m.id);
+        const banner = document.createElement('div');
+        banner.className = 'phase-milestone-block mono-text';
+        banner.dataset.phase = m.phase;
+        banner.id = `milestone-${m.id}`;
+
+        // Milestone alternating sides: even index label on left, odd index label on right
+        const isLabelLeft = mIdx % 2 === 0;
+
+        banner.innerHTML = `
+          <div class="milestone-grid ${isLabelLeft ? 'label-left' : 'label-right'}">
+            <div class="milestone-label-card">
+              <span class="phase-mini-tag">${m.phaseBadge}</span>
+              <h4 class="milestone-heading">${m.label}</h4>
+            </div>
+            <div class="milestone-node-pin" aria-hidden="true">
+              <span class="milestone-pin-core">✦</span>
+            </div>
+            <div class="milestone-descriptor-card">
+              <span class="descriptor-eyebrow">MILESTONE TRACK //</span>
+              <p class="descriptor-text">${m.descriptor}</p>
+            </div>
           </div>
-          <div class="milestone-desc-side">${phaseInfo ? phaseInfo.descriptor : ''}</div>
-        </div>
-      `;
-      container.appendChild(banner);
-    }
+        `;
+        container.appendChild(banner);
+      }
+    });
 
-    // Alternating Left / Right layout
+    // Alternating Left / Right layout: Week 01 Left, Week 02 Right, etc.
     const isLeft = index % 2 === 0;
 
-    // Status styling tag
+    // Status tag styling
     let statusClass = 'upcoming';
     if (item.status === 'Completed') statusClass = 'completed';
     else if (item.status === 'In progress') statusClass = 'in-progress';
@@ -343,10 +358,15 @@ function initProtoSemTimeline() {
     nodeRow.className = `timeline-node-row ${isLeft ? 'left' : 'right'}`;
     nodeRow.dataset.phase = item.phase;
     nodeRow.dataset.week = item.week;
+    nodeRow.id = `week-${item.week}`;
 
     const isFirstCard = index === 0;
+    const nextWeekNum = item.week < 20 ? item.week + 1 : null;
 
     nodeRow.innerHTML = `
+      <!-- Connector line between node and card -->
+      <div class="node-connector-line" aria-hidden="true"></div>
+
       <!-- Center Circular Node with Week Number -->
       <div class="timeline-marker-node mono-text" aria-hidden="true">${item.week}</div>
 
@@ -358,37 +378,67 @@ function initProtoSemTimeline() {
            aria-label="Week ${item.week}: ${item.title}">
         
         <div class="card-top-row">
-          <span class="week-code mono-text">WEEK ${item.week.toString().padStart(2, '0')} // ${item.phaseLabel}</span>
+          <span class="week-code mono-text">WEEK ${item.week.toString().padStart(2, '0')} · ${item.phaseLabel}</span>
           <span class="status-badge ${statusClass} mono-text">${item.status}</span>
         </div>
 
-        <div class="card-week-title">${item.title}</div>
+        <h4 class="card-week-title">${item.title}</h4>
 
         <div class="card-details-panel">
           <p class="body-text">${item.summary || 'Ongoing exploration of intelligent commerce systems.'}</p>
         </div>
 
         <div class="card-bottom-actions mono-text">
-          <span class="toggle-label">${isFirstCard ? 'COLLAPSE DETAILS' : 'EXPAND DETAILS'}</span>
-          <span class="toggle-icon">›</span>
+          ${nextWeekNum ? `
+            <a href="#week-${nextWeekNum}" class="next-week-link" data-target-week="${nextWeekNum}">
+              <span>NEXT WEEK</span>
+              <span class="next-arrow">›</span>
+            </a>
+          ` : `
+            <span class="final-milestone-tag">FINAL MILESTONE ✦</span>
+          `}
+          <span class="toggle-indicator">${isFirstCard ? 'COLLAPSE' : 'EXPAND'}</span>
         </div>
       </div>
     `;
 
-    // Click / Enter interaction to toggle expansion
+    // Click / Enter interaction to toggle card expansion
     const cardEl = nodeRow.querySelector('.timeline-card');
-    const toggleExpand = () => {
-      const isExpanded = cardEl.classList.toggle('expanded');
+    const toggleExpand = (expandState) => {
+      const isExpanded = typeof expandState === 'boolean' ? cardEl.classList.toggle('expanded', expandState) : cardEl.classList.toggle('expanded');
       cardEl.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-      const toggleLabel = cardEl.querySelector('.toggle-label');
-      if (toggleLabel) {
-        toggleLabel.textContent = isExpanded ? 'COLLAPSE DETAILS' : 'EXPAND DETAILS';
+      const toggleIndicator = cardEl.querySelector('.toggle-indicator');
+      if (toggleIndicator) {
+        toggleIndicator.textContent = isExpanded ? 'COLLAPSE' : 'EXPAND';
       }
-      // Redraw winding highway after height changes
-      setTimeout(drawWindingHighway, 100);
+      setTimeout(drawWindingHighway, 80);
     };
 
-    cardEl.addEventListener('click', toggleExpand);
+    cardEl.addEventListener('click', (e) => {
+      // If user clicked the "NEXT WEEK ›" link, navigate to next week card
+      if (e.target.closest('.next-week-link')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (nextWeekNum) {
+          const nextRow = document.getElementById(`week-${nextWeekNum}`);
+          if (nextRow) {
+            const nextCard = nextRow.querySelector('.timeline-card');
+            if (nextCard) {
+              nextCard.classList.add('expanded');
+              nextCard.setAttribute('aria-expanded', 'true');
+              const nextIndicator = nextCard.querySelector('.toggle-indicator');
+              if (nextIndicator) nextIndicator.textContent = 'COLLAPSE';
+              nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              nextCard.focus();
+              setTimeout(drawWindingHighway, 100);
+            }
+          }
+        }
+        return;
+      }
+      toggleExpand();
+    });
+
     cardEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -399,11 +449,11 @@ function initProtoSemTimeline() {
     container.appendChild(nodeRow);
   });
 
-  // Calculate and draw SVG Path
+  // Calculate and draw SVG Winding Path
   drawWindingHighway();
-  window.addEventListener('resize', debounce(drawWindingHighway, 150));
+  window.addEventListener('resize', debounce(drawWindingHighway, 120));
 
-  // Initialize Filter Buttons
+  // Initialize Filter Buttons: ALL (20), Phase 01, Phase 02, Phase 03, Phase 04
   const filterBtns = document.querySelectorAll('#timeline-filters .filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -428,14 +478,16 @@ function initProtoSemTimeline() {
       // Filter milestone banners
       document.querySelectorAll('.phase-milestone-block').forEach(banner => {
         if (selectedPhase === 'all' || banner.dataset.phase === selectedPhase) {
+          banner.classList.remove('filtered-out');
           banner.style.display = 'block';
         } else {
+          banner.classList.add('filtered-out');
           banner.style.display = 'none';
         }
       });
 
-      // Redraw SVG path after DOM adjusts
-      setTimeout(drawWindingHighway, 200);
+      // Redraw SVG path to adjust to filtered content while remaining continuous
+      setTimeout(drawWindingHighway, 150);
     });
   });
 }
@@ -453,7 +505,7 @@ function drawWindingHighway() {
 
   const totalHeight = container.offsetHeight || 600;
   const isMobile = window.innerWidth < 768;
-  const svgWidth = isMobile ? 60 : 140;
+  const svgWidth = isMobile ? 60 : 160;
 
   svg.setAttribute('viewBox', `0 0 ${svgWidth} ${totalHeight}`);
   svg.style.height = `${totalHeight}px`;
@@ -461,25 +513,50 @@ function drawWindingHighway() {
   const centerX = svgWidth / 2;
 
   if (isMobile) {
-    // Clean straight vertical line on mobile
+    // Pinned straight line on mobile through all nodes
     const pathD = `M ${centerX} 0 L ${centerX} ${totalHeight}`;
     pathGlow.setAttribute('d', pathD);
     pathCore.setAttribute('d', pathD);
     return;
   }
 
-  // Centered gentle winding wave on desktop
-  const segments = 24;
-  let d = `M ${centerX} 0`;
-  const segmentHeight = totalHeight / segments;
+  // Smooth winding wave along the center line
+  const visibleNodes = Array.from(container.querySelectorAll('.timeline-node-row:not(.filtered-out)'));
+  if (visibleNodes.length === 0) {
+    const pathD = `M ${centerX} 0 L ${centerX} ${totalHeight}`;
+    pathGlow.setAttribute('d', pathD);
+    pathCore.setAttribute('d', pathD);
+    return;
+  }
 
-  for (let i = 1; i <= segments; i++) {
-    const y = segmentHeight * i;
-    const prevY = segmentHeight * (i - 1);
-    const midY = (y + prevY) / 2;
-    // Alternate gentle horizontal oscillation
-    const offset = i % 2 === 0 ? 28 : -28;
-    d += ` Q ${centerX + offset} ${midY}, ${centerX} ${y}`;
+  // Generate smooth sine curve passing through each node
+  let d = `M ${centerX} 0`;
+  const containerRect = container.getBoundingClientRect();
+
+  const nodePoints = visibleNodes.map(node => {
+    const marker = node.querySelector('.timeline-marker-node');
+    if (!marker) return null;
+    const mRect = marker.getBoundingClientRect();
+    const y = (mRect.top + mRect.height / 2) - containerRect.top;
+    return y;
+  }).filter(y => y !== null);
+
+  if (nodePoints.length > 0) {
+    // Connect to first node
+    d += ` L ${centerX} ${Math.max(0, nodePoints[0])}`;
+
+    for (let i = 0; i < nodePoints.length - 1; i++) {
+      const yCurrent = nodePoints[i];
+      const yNext = nodePoints[i + 1];
+      const midY = (yCurrent + yNext) / 2;
+      const offset = i % 2 === 0 ? 26 : -26;
+      d += ` Q ${centerX + offset} ${midY}, ${centerX} ${yNext}`;
+    }
+
+    // Connect to bottom
+    d += ` L ${centerX} ${totalHeight}`;
+  } else {
+    d = `M ${centerX} 0 L ${centerX} ${totalHeight}`;
   }
 
   pathGlow.setAttribute('d', d);

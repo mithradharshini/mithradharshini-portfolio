@@ -113,17 +113,17 @@ const portfolioData = {
   // SECTION 03: PRICE PROTOSEM (FLAGSHIP 20-WEEK INNOVATION HIGHWAY)
   protosem: {
     sectionCode: "SEC 03 // FLAGSHIP PROJECT",
-    leftLabel: "PROTOSEM // INNOVATION FELLOWSHIP",
+    leftLabel: "PROTOSEM · INNOVATION FELLOWSHIP",
     rightLabel: "20-WEEK FIELD JOURNAL",
     eyebrow: "PROGRAMME",
     title: "PRICE ProtoSem",
-    role: "Innovation Engineer Trainee",
-    programmeLine: "20-Week Industry-Integrated Innovation Programme, Phygital Retail & Intelligent Commerce Track",
+    role: "Role: Innovation Engineer Trainee",
+    programmeLine: "20-WEEK INDUSTRY-INTEGRATED INNOVATION PROGRAMME",
     status: "ONGOING",
     metaBadges: [
-      { label: "TRACK", value: "PHYGITAL RETAIL & COMMERCE" },
-      { label: "STATUS", value: "ONGOING // IN FLIGHT" },
-      { label: "CADENCE", value: "20-WEEK IMMERSION" }
+      { label: "COMMITMENT", value: "FULL-TIME RESIDENCY" },
+      { label: "SCHEDULE", value: "20 WEEKS (5 PHASES)" },
+      { label: "TRACK", value: "PHYGITAL RETAIL & COMMERCE" }
     ],
     descCol1: "Selected for an intensive programme solving real-world retail and commerce challenges through AI, analytics, intelligent systems, IoT, prototyping and entrepreneurship.",
     descCol2: "Collaborating on live industry problem statements to explore, formulate and validate practical technological solutions; conducting systematic retail market research, consumer touchpoint analysis and rapid solution prototyping in an incubation ecosystem.",
@@ -141,31 +141,47 @@ const portfolioData = {
     highwayTitle: "The 20-Week Innovation Highway",
     highwaySubtitle: "Chronological progression through exploration, system discovery, prototyping, and venture validation.",
 
-    // Phase Headers along the winding highway with paired opposite descriptors
-    phases: [
+    // 5 Phase Header Milestone blocks along the winding highway
+    milestones: [
       {
-        phaseId: 1,
-        name: "Phase 01 - Discovery",
-        milestone: "Prologue & Onboarding",
-        descriptor: "Retail Product Sensing & Field Observation (Weeks 01-05)"
+        id: "m0",
+        beforeWeek: 1,
+        phase: 1,
+        phaseBadge: "PROLOGUE",
+        label: "Prologue & Onboarding",
+        descriptor: "Cohort Induction & Program Kickoff"
       },
       {
-        phaseId: 2,
-        name: "Phase 02 - Technology & Systems",
-        milestone: "Phase 02 - Technology & Systems",
-        descriptor: "AI, IoT & Intelligent Systems Exploration (Weeks 06-10)"
+        id: "m1",
+        beforeWeek: 2,
+        phase: 1,
+        phaseBadge: "PHASE 01",
+        label: "Phase 01 - Discovery",
+        descriptor: "Retail Product Sensing & Field Observation"
       },
       {
-        phaseId: 3,
-        name: "Phase 03 - Prototyping",
-        milestone: "Phase 03 - Prototyping",
-        descriptor: "Iterative Prototyping & Commerce Testing (Weeks 11-15)"
+        id: "m2",
+        beforeWeek: 6,
+        phase: 2,
+        phaseBadge: "PHASE 02",
+        label: "Phase 02 - Technology & Systems",
+        descriptor: "AI, IoT & Intelligent Systems Exploration"
       },
       {
-        phaseId: 4,
-        name: "Phase 04 - Synthesis & Validation",
-        milestone: "Phase 04 - Synthesis & Validation",
-        descriptor: "Commercial Viability & Venture Readiness (Weeks 16-20)"
+        id: "m3",
+        beforeWeek: 11,
+        phase: 3,
+        phaseBadge: "PHASE 03",
+        label: "Phase 03 - Prototyping",
+        descriptor: "Iterative Prototyping & Commerce Testing"
+      },
+      {
+        id: "m4",
+        beforeWeek: 16,
+        phase: 4,
+        phaseBadge: "PHASE 04",
+        label: "Phase 04 - Synthesis & Validation",
+        descriptor: "Commercial Viability & Venture Readiness"
       }
     ],
 
