@@ -263,6 +263,9 @@ function initActiveSectionSpy() {
   const sections = document.querySelectorAll('main section[id]');
   const navLinks = document.querySelectorAll('.nav-link');
 
+  // Immediately make all sections visible so content is NEVER hidden behind opacity:0
+  sections.forEach(sec => sec.classList.add('visible'));
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -277,7 +280,7 @@ function initActiveSectionSpy() {
         });
       }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.01 });
 
   sections.forEach(sec => observer.observe(sec));
 }
@@ -538,10 +541,10 @@ function drawWindingHighway() {
     if (!marker) return null;
     const mRect = marker.getBoundingClientRect();
     const y = (mRect.top + mRect.height / 2) - containerRect.top;
-    return y;
+    return (isNaN(y) || y <= 0) ? null : y;
   }).filter(y => y !== null);
 
-  if (nodePoints.length > 0) {
+  if (nodePoints.length > 1) {
     // Connect to first node
     d += ` L ${centerX} ${Math.max(0, nodePoints[0])}`;
 
@@ -556,7 +559,16 @@ function drawWindingHighway() {
     // Connect to bottom
     d += ` L ${centerX} ${totalHeight}`;
   } else {
-    d = `M ${centerX} 0 L ${centerX} ${totalHeight}`;
+    // Fallback wave
+    const segments = 20;
+    const segmentHeight = totalHeight / segments;
+    for (let i = 1; i <= segments; i++) {
+      const y = segmentHeight * i;
+      const prevY = segmentHeight * (i - 1);
+      const midY = (y + prevY) / 2;
+      const offset = i % 2 === 0 ? 26 : -26;
+      d += ` Q ${centerX + offset} ${midY}, ${centerX} ${y}`;
+    }
   }
 
   pathGlow.setAttribute('d', d);

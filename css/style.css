@@ -1783,12 +1783,19 @@ body {
 .footer-sep { margin: 0 0.5rem; color: var(--neon-magenta); }
 
 /* ==========================================================================
-   SCROLL REVEAL & REDUCED MOTION
+   SCROLL REVEAL & VISIBILITY
    ========================================================================== */
+#protosem,
+.protosem-panel {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
 .scroll-reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  transform: none;
 }
 .scroll-reveal.visible {
   opacity: 1;
