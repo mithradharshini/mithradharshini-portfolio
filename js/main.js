@@ -1,272 +1,536 @@
+/**
+ * MITHRA.OS // CLIENT CONTROLLER & INTERACTION ENGINE
+ * ----------------------------------------------------------------------------
+ * Powers dynamic DOM rendering from content.js, winding SVG highway math,
+ * timeline filtering, expandable cards, skippable boot loader, and HUD telemetry.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
-  initContent();
+  renderContent();
   initBootLoader();
-  initScrollEffects();
-  initProtoSemTimeline();
+  initScrollFuel();
+  initActiveSectionSpy();
   initEffectsToggle();
+  initProtoSemTimeline();
+  initContactForm();
 });
 
-function initContent() {
+/* ==========================================================================
+   1. CONTENT RENDERER (FROM SINGLE SOURCE OF TRUTH: content.js)
+   ========================================================================== */
+function renderContent() {
   const data = portfolioData;
-  
-  // Hero
-  document.getElementById('hero-loc').textContent = data.meta.location;
-  document.getElementById('hero-status').textContent = data.hero.status;
-  document.getElementById('hero-mission').textContent = data.hero.mission;
-  document.getElementById('hero-name').textContent = data.hero.name;
+
+  // Hero Section
+  document.getElementById('hero-loc').textContent = data.hero.locationReadout;
+  document.getElementById('hero-status').textContent = data.hero.statusReadout;
+  document.getElementById('hero-mission').textContent = data.hero.missionReadout;
+  document.getElementById('hero-name').textContent = data.hero.displayName;
   document.getElementById('hero-tagline').textContent = data.hero.tagline;
 
-  // About
+  // Marquee Ticker Strip
+  const tickerStrip = document.getElementById('ticker-strip');
+  if (tickerStrip && data.ticker) {
+    // Duplicate 3 times for seamless infinite scroll
+    const items = [...data.ticker, ...data.ticker, ...data.ticker];
+    tickerStrip.innerHTML = items.map(item => `
+      <span class="ticker-item">
+        <span>${item}</span>
+        <span class="ticker-bullet">✦</span>
+      </span>
+    `).join('');
+  }
+
+  // Section 01: About
   document.getElementById('about-summary-text').textContent = data.about.summary;
   const skillsContainer = document.getElementById('about-skills-container');
-  for (const [category, skills] of Object.entries(data.about.skills)) {
+  skillsContainer.innerHTML = '';
+  data.about.modules.forEach(module => {
     const card = document.createElement('div');
     card.className = 'module-card';
     card.innerHTML = `
-      <div class="mono-text neon-cyan-text mb-2">${category}</div>
+      <div class="module-header mono-text">
+        <span class="module-title">${module.category}</span>
+        <span class="module-badge">${module.badge}</span>
+      </div>
       <div class="tag-cloud">
-        ${skills.map(s => `<span>${s}</span>`).join('')}
+        ${module.skills.map(skill => `<span class="tag-chip">${skill}</span>`).join('')}
       </div>
     `;
     skillsContainer.appendChild(card);
-  }
+  });
 
-  // Experience
+  // Section 02: Experience (Mission Log)
   const expContainer = document.getElementById('experience-container');
-  data.experience.forEach(exp => {
-    const el = document.createElement('div');
-    el.innerHTML = `
-      <h3 class="display-text neon-magenta-text" style="font-size: 1.5rem; margin-bottom: 0.25rem;">${exp.role}</h3>
-      <div class="mono-text neon-cyan-text mb-4">${exp.company} // ${exp.duration}</div>
-      <ul style="list-style-type: square; padding-left: 1.5rem; color: var(--text-muted);" class="body-text">
-        ${exp.bullets.map(b => `<li style="margin-bottom: 0.5rem;">${b}</li>`).join('')}
+  expContainer.innerHTML = '';
+  data.experience.missions.forEach(mission => {
+    const entry = document.createElement('div');
+    entry.className = 'mission-log-entry';
+    entry.innerHTML = `
+      <div class="mission-top-line">
+        <h3 class="mission-role-title display-text">${mission.role}</h3>
+        <span class="hud-tag status-active mono-text">
+          <span class="status-led led-green"></span>STATUS: ${mission.status}
+        </span>
+      </div>
+      <div class="mission-meta-strip mono-text">
+        <span><i data-lucide="building" class="icon-sm"></i> ${mission.organization}</span>
+        <span>•</span>
+        <span><i data-lucide="calendar" class="icon-sm"></i> ${mission.duration}</span>
+      </div>
+      <ul class="mission-bullets-list body-text">
+        ${mission.bullets.map(b => `
+          <li class="mission-bullet-item">
+            <span class="bullet-marker">›</span>
+            <span>${b}</span>
+          </li>
+        `).join('')}
       </ul>
     `;
-    expContainer.appendChild(el);
+    expContainer.appendChild(entry);
   });
 
-  // ProtoSem Intro
-  document.getElementById('protosem-title').textContent = data.protosem.title;
+  // Section 03: ProtoSem Intro
+  document.getElementById('protosem-heading').textContent = data.protosem.title;
   document.getElementById('protosem-role').textContent = data.protosem.role;
-  document.getElementById('protosem-subtitle').textContent = data.protosem.subtitle;
-  document.getElementById('protosem-status').textContent = data.protosem.status;
-  document.getElementById('protosem-desc1').textContent = data.protosem.description1;
-  document.getElementById('protosem-desc2').textContent = data.protosem.description2;
-  
-  const tagsContainer = document.getElementById('protosem-tags');
-  data.protosem.tags.forEach((t, i) => {
-    const span = document.createElement('span');
-    span.textContent = t;
-    if (i === data.protosem.activeTagIndex) span.classList.add('highlight');
-    tagsContainer.appendChild(span);
-  });
+  document.getElementById('protosem-programme-line').textContent = data.protosem.programmeLine;
+  document.getElementById('highway-subtitle').textContent = data.protosem.highwaySubtitle;
+  document.getElementById('protosem-desc1').textContent = data.protosem.descCol1;
+  document.getElementById('protosem-desc2').textContent = data.protosem.descCol2;
 
-  // Leadership
-  const ldrContainer = document.getElementById('leadership-container');
-  data.leadership.forEach(item => {
-    ldrContainer.innerHTML += `
-      <div class="module-card">
-        <h4 class="display-text neon-magenta-text" style="font-size:1.1rem; margin-bottom:0.25rem">${item.role}</h4>
-        <div class="mono-text neon-cyan-text" style="margin-bottom:1rem">${item.organization}</div>
-        <p class="body-text text-sm muted-text">${item.description}</p>
+  // ProtoSem Meta Badges
+  const metaBox = document.getElementById('protosem-meta-box');
+  metaBox.innerHTML = data.protosem.metaBadges.map(b => `
+    <div class="meta-row">
+      <span class="label">${b.label}:</span>
+      <span class="val">${b.value}</span>
+    </div>
+  `).join('');
+
+  // ProtoSem Discipline Pills
+  const disciplinesContainer = document.getElementById('protosem-tags');
+  disciplinesContainer.innerHTML = data.protosem.disciplines.map(d => `
+    <span class="tag-chip ${d.highlighted ? 'highlight' : ''}">${d.name}</span>
+  `).join('');
+
+  // Section 04: Leadership (Crew Badges)
+  const leadContainer = document.getElementById('leadership-container');
+  leadContainer.innerHTML = '';
+  data.leadership.badges.forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'crew-badge-card';
+    card.innerHTML = `
+      <div>
+        <div class="crew-code-tag mono-text">${b.code} // COMMAND</div>
+        <h3 class="crew-role-title display-text">${b.role}</h3>
+        <div class="crew-org-name mono-text">${b.organization}</div>
+        <p class="crew-desc body-text">${b.description}</p>
       </div>
+      <div class="crew-highlight-pill mono-text">${b.highlight}</div>
     `;
+    leadContainer.appendChild(card);
   });
 
-  // Certifications
+  // Section 05: Certifications (Honors Medals)
   const certContainer = document.getElementById('certifications-container');
-  data.certifications.forEach(item => {
-    certContainer.innerHTML += `
-      <div class="module-card">
-        <h4 class="display-text neon-orange-text" style="font-size:1.1rem; margin-bottom:0.25rem">${item.title}</h4>
-        <div class="mono-text neon-cyan-text" style="margin-bottom:1rem">${item.issuer}</div>
-        <p class="body-text text-sm muted-text">${item.description}</p>
+  certContainer.innerHTML = '';
+  data.certifications.medals.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'medal-card';
+    card.innerHTML = `
+      <div class="medal-header mono-text">
+        <span class="crew-code-tag">${m.badgeCode}</span>
+        <span class="medal-tag">${m.tag}</span>
       </div>
+      <h3 class="medal-title display-text">${m.title}</h3>
+      <div class="medal-issuer mono-text">${m.issuer} • ${m.duration}</div>
+      <p class="body-text text-muted">${m.description}</p>
     `;
+    certContainer.appendChild(card);
   });
 
-  // Education
+  // Section 06: Education (Flight Record)
   const eduContainer = document.getElementById('education-container');
-  data.education.forEach(item => {
-    eduContainer.innerHTML += `
-      <div class="module-card">
-        <h4 class="display-text neon-yellow-text" style="font-size:1.1rem; margin-bottom:0.25rem">${item.degree}</h4>
-        <div class="mono-text muted-text" style="margin-bottom:1rem">${item.institution}</div>
-        <div class="mono-text neon-cyan-text">${item.period}</div>
-        <div class="body-text muted-text">${item.details}</div>
+  eduContainer.innerHTML = '';
+  data.education.records.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'flight-record-card';
+    card.innerHTML = `
+      <div>
+        <div class="flight-level-tag mono-text">${r.level}</div>
+        <h3 class="flight-degree-title display-text">${r.degree}</h3>
+        <div class="flight-institution">${r.institution}</div>
+        <div class="mono-text text-sm muted-text mb-3">${r.location} • ${r.period}</div>
+      </div>
+      <div>
+        <div class="flight-score-badge mono-text">
+          <span>${r.scoreLabel}:</span>
+          <span>${r.scoreValue}</span>
+        </div>
+        <p class="body-text text-sm muted-text">${r.notes}</p>
       </div>
     `;
+    eduContainer.appendChild(card);
   });
 
-  // Contact
-  document.getElementById('contact-text').textContent = data.contactText;
-  document.getElementById('contact-loc').textContent = data.meta.location;
-  document.getElementById('contact-email').textContent = data.meta.email;
-  document.getElementById('contact-email').href = `mailto:${data.meta.email}`;
-  document.getElementById('contact-linkedin').textContent = 'LinkedIn Profile';
-  document.getElementById('contact-linkedin').href = data.meta.linkedin;
+  // Section 07: Contact
+  document.getElementById('contact-subtext').textContent = data.contact.subtext;
+  document.getElementById('contact-location').textContent = data.contact.location;
   
-  if(data.meta.formspreeEndpoint) {
-    document.getElementById('contact-form').action = data.meta.formspreeEndpoint;
-    document.getElementById('contact-form').method = "POST";
-  } else {
-    document.getElementById('contact-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert("Form endpoint not configured. Redirecting to Mailto.");
-      window.location.href = `mailto:${data.meta.email}`;
-    });
+  const emailLink = document.getElementById('contact-email');
+  emailLink.textContent = data.contact.email;
+  emailLink.href = `mailto:${data.contact.email}`;
+
+  const linkedInLink = document.getElementById('contact-linkedin');
+  linkedInLink.textContent = 'linkedin.com/in/mithra-dharshini-r';
+  linkedInLink.href = data.contact.linkedin;
+
+  // Re-initialize any dynamic Lucide icons created during render
+  if (window.lucide) {
+    lucide.createIcons();
   }
 }
 
+/* ==========================================================================
+   2. BOOT LOADER (SKIPPABLE BIOS INITIALIZATION)
+   ========================================================================== */
 function initBootLoader() {
   const loader = document.getElementById('boot-loader');
   const progressEl = document.getElementById('boot-progress');
   const barEl = document.getElementById('boot-bar');
+  const skipBtn = document.getElementById('skip-boot-btn');
   
+  // Instant bypass if user has reduced-motion enabled
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    loader.style.display = 'none';
+    if (loader) loader.style.display = 'none';
     return;
   }
 
   let progress = 0;
-  const interval = setInterval(() => {
-    progress += Math.floor(Math.random() * 15) + 5;
-    if (progress > 100) progress = 100;
-    progressEl.textContent = progress;
-    barEl.style.width = `${progress}%`;
-    
-    if (progress === 100) {
-      clearInterval(interval);
+  let hasSkipped = false;
+
+  const dismissLoader = () => {
+    if (hasSkipped) return;
+    hasSkipped = true;
+    clearInterval(bootInterval);
+    if (loader) {
+      loader.style.opacity = '0';
       setTimeout(() => {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.style.display = 'none', 500);
-      }, 300);
+        loader.style.display = 'none';
+      }, 400);
     }
-  }, 100);
+  };
+
+  const bootInterval = setInterval(() => {
+    progress += Math.floor(Math.random() * 18) + 8;
+    if (progress >= 100) {
+      progress = 100;
+      progressEl.textContent = 100;
+      barEl.style.width = '100%';
+      clearInterval(bootInterval);
+      setTimeout(dismissLoader, 300);
+    } else {
+      progressEl.textContent = progress;
+      barEl.style.width = `${progress}%`;
+    }
+  }, 75);
+
+  // Keyboard shortcut (Escape or Space) and click to skip
+  if (skipBtn) skipBtn.addEventListener('click', dismissLoader);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
+      dismissLoader();
+    }
+  }, { once: true });
 }
 
-function initEffectsToggle() {
-  const btn = document.getElementById('toggle-effects');
-  btn.addEventListener('click', () => {
-    document.body.classList.toggle('no-fx');
-    btn.textContent = document.body.classList.contains('no-fx') ? "FX:OFF" : "FX:ON";
-  });
-}
-
-function initScrollEffects() {
-  // Fuel Gauge
+/* ==========================================================================
+   3. HUD SCROLL PROGRESS (FUEL GAUGE) & INTERSECTION OBSERVER
+   ========================================================================== */
+function initScrollFuel() {
   const fuel = document.getElementById('scroll-fuel');
-  window.addEventListener('scroll', () => {
-    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
-    fuel.style.width = scrolled + "%";
-  });
+  if (!fuel) return;
 
-  // Reveal
+  window.addEventListener('scroll', () => {
+    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+    fuel.style.width = `${Math.min(100, Math.max(0, scrolled))}%`;
+  }, { passive: true });
+}
+
+function initActiveSectionSpy() {
+  const sections = document.querySelectorAll('main section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
+        const activeId = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          if (link.dataset.section === activeId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.15 });
 
-  document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+  sections.forEach(sec => observer.observe(sec));
 }
 
-function initProtoSemTimeline() {
-  const data = portfolioData.protosem.weeks;
-  const container = document.getElementById('timeline-nodes-container');
-  let currentPhase = 0;
+/* ==========================================================================
+   4. FX TOGGLE (REDUCED VISUAL EFFECTS)
+   ========================================================================== */
+function initEffectsToggle() {
+  const btn = document.getElementById('toggle-effects');
+  const textEl = document.getElementById('fx-text');
+  if (!btn) return;
 
-  data.forEach((item, index) => {
-    // Inject phase header if it's new
-    if (item.phase !== currentPhase) {
+  btn.addEventListener('click', () => {
+    document.body.classList.toggle('no-fx');
+    const isOff = document.body.classList.contains('no-fx');
+    if (textEl) textEl.textContent = isOff ? "FX: OFF" : "FX: ON";
+    btn.setAttribute('aria-pressed', isOff ? "true" : "false");
+  });
+}
+
+/* ==========================================================================
+   5. PRICE PROTOSEM 20-WEEK TIMELINE & WINDING SVG HIGHWAY
+   ========================================================================== */
+function initProtoSemTimeline() {
+  const data = portfolioData.protosem;
+  const container = document.getElementById('timeline-nodes-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  let activePhase = 0;
+
+  // Render all 20 weeks with phase headers
+  data.weeks.forEach((item, index) => {
+    // If transitioning to a new phase, inject Phase Header Banner with paired descriptor
+    if (item.phase !== activePhase) {
+      activePhase = item.phase;
+      const phaseInfo = data.phases.find(p => p.phaseId === activePhase);
+
       const banner = document.createElement('div');
-      banner.className = 'phase-header-banner mono-text';
-      banner.innerHTML = `<span>${item.phaseLabel}</span>`;
+      banner.className = 'phase-milestone-block mono-text';
+      banner.dataset.phase = activePhase;
+      banner.innerHTML = `
+        <div class="milestone-content">
+          <div class="milestone-title-side neon-cyan-text">${phaseInfo ? phaseInfo.milestone : item.phaseLabel}</div>
+          <div class="milestone-badge-side">
+            <span class="phase-pill-badge">${item.phaseLabel}</span>
+          </div>
+          <div class="milestone-desc-side">${phaseInfo ? phaseInfo.descriptor : ''}</div>
+        </div>
+      `;
       container.appendChild(banner);
-      currentPhase = item.phase;
     }
 
-    // Determine layout
+    // Alternating Left / Right layout
     const isLeft = index % 2 === 0;
-    
-    // Status color
-    let statusClass = '';
-    if(item.status === 'Completed') statusClass = 'active';
-    else if(item.status === 'Upcoming') statusClass = 'upcoming';
 
-    const node = document.createElement('div');
-    node.className = `timeline-node-item ${isLeft ? 'left' : 'right'}`;
-    node.dataset.phase = item.phase;
-    
-    node.innerHTML = `
-      <div class="timeline-marker"></div>
-      <div class="timeline-card">
-        <div class="card-header">
-          <span class="mono-text muted-text">WEEK ${(index+1).toString().padStart(2, '0')} // PHASE ${item.phase.toString().padStart(2, '0')}</span>
-          <span class="hud-tag status-tag ${statusClass}">${item.status}</span>
+    // Status styling tag
+    let statusClass = 'upcoming';
+    if (item.status === 'Completed') statusClass = 'completed';
+    else if (item.status === 'In progress') statusClass = 'in-progress';
+
+    const nodeRow = document.createElement('div');
+    nodeRow.className = `timeline-node-row ${isLeft ? 'left' : 'right'}`;
+    nodeRow.dataset.phase = item.phase;
+    nodeRow.dataset.week = item.week;
+
+    const isFirstCard = index === 0;
+
+    nodeRow.innerHTML = `
+      <!-- Center Circular Node with Week Number -->
+      <div class="timeline-marker-node mono-text" aria-hidden="true">${item.week}</div>
+
+      <!-- Interactive Week Card -->
+      <div class="timeline-card ${isFirstCard ? 'active-card expanded' : ''}" 
+           tabindex="0" 
+           role="button" 
+           aria-expanded="${isFirstCard ? 'true' : 'false'}"
+           aria-label="Week ${item.week}: ${item.title}">
+        
+        <div class="card-top-row">
+          <span class="week-code mono-text">WEEK ${item.week.toString().padStart(2, '0')} // ${item.phaseLabel}</span>
+          <span class="status-badge ${statusClass} mono-text">${item.status}</span>
         </div>
+
         <div class="card-week-title">${item.title}</div>
+
+        <div class="card-details-panel">
+          <p class="body-text">${item.summary || 'Ongoing exploration of intelligent commerce systems.'}</p>
+        </div>
+
+        <div class="card-bottom-actions mono-text">
+          <span class="toggle-label">${isFirstCard ? 'COLLAPSE DETAILS' : 'EXPAND DETAILS'}</span>
+          <span class="toggle-icon">›</span>
+        </div>
       </div>
     `;
-    container.appendChild(node);
+
+    // Click / Enter interaction to toggle expansion
+    const cardEl = nodeRow.querySelector('.timeline-card');
+    const toggleExpand = () => {
+      const isExpanded = cardEl.classList.toggle('expanded');
+      cardEl.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      const toggleLabel = cardEl.querySelector('.toggle-label');
+      if (toggleLabel) {
+        toggleLabel.textContent = isExpanded ? 'COLLAPSE DETAILS' : 'EXPAND DETAILS';
+      }
+      // Redraw winding highway after height changes
+      setTimeout(drawWindingHighway, 100);
+    };
+
+    cardEl.addEventListener('click', toggleExpand);
+    cardEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleExpand();
+      }
+    });
+
+    container.appendChild(nodeRow);
   });
 
-  // Draw winding SVG
-  drawWindingPath();
-  window.addEventListener('resize', drawWindingPath);
+  // Calculate and draw SVG Path
+  drawWindingHighway();
+  window.addEventListener('resize', debounce(drawWindingHighway, 150));
 
-  // Filters
-  const filters = document.querySelectorAll('.filter-btn');
-  filters.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      filters.forEach(f => f.classList.remove('active'));
-      e.target.classList.add('active');
-      const phase = e.target.dataset.phase;
-      
-      document.querySelectorAll('.timeline-node-item').forEach(node => {
-        if (phase === 'all' || node.dataset.phase === phase) {
+  // Initialize Filter Buttons
+  const filterBtns = document.querySelectorAll('#timeline-filters .filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+
+      const selectedPhase = btn.dataset.phase;
+
+      // Filter timeline nodes
+      document.querySelectorAll('.timeline-node-row').forEach(node => {
+        if (selectedPhase === 'all' || node.dataset.phase === selectedPhase) {
           node.classList.remove('filtered-out');
         } else {
           node.classList.add('filtered-out');
         }
       });
-      // Redraw SVG after transition
-      setTimeout(drawWindingPath, 300);
+
+      // Filter milestone banners
+      document.querySelectorAll('.phase-milestone-block').forEach(banner => {
+        if (selectedPhase === 'all' || banner.dataset.phase === selectedPhase) {
+          banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
+        }
+      });
+
+      // Redraw SVG path after DOM adjusts
+      setTimeout(drawWindingHighway, 200);
     });
   });
 }
 
-function drawWindingPath() {
+/**
+ * Generates dynamic SVG sine-wave highway centered across desktop nodes
+ * and straight on mobile.
+ */
+function drawWindingHighway() {
   const svg = document.getElementById('timeline-svg');
   const pathGlow = document.getElementById('timeline-path-glow');
   const pathCore = document.getElementById('timeline-path-core');
-  
-  const width = svg.clientWidth || 100;
-  const height = document.getElementById('timeline-nodes-container').clientHeight;
-  svg.setAttribute('viewBox', \`0 0 \${width} \${height}\`);
-  svg.style.height = height + 'px';
+  const container = document.getElementById('timeline-nodes-container');
+  if (!svg || !container || !pathGlow || !pathCore) return;
 
-  // Create a gentle sine wave
-  let d = \`M \${width/2} 0\`;
-  const segments = 10;
+  const totalHeight = container.offsetHeight || 600;
+  const isMobile = window.innerWidth < 768;
+  const svgWidth = isMobile ? 60 : 140;
+
+  svg.setAttribute('viewBox', `0 0 ${svgWidth} ${totalHeight}`);
+  svg.style.height = `${totalHeight}px`;
+
+  const centerX = svgWidth / 2;
+
+  if (isMobile) {
+    // Clean straight vertical line on mobile
+    const pathD = `M ${centerX} 0 L ${centerX} ${totalHeight}`;
+    pathGlow.setAttribute('d', pathD);
+    pathCore.setAttribute('d', pathD);
+    return;
+  }
+
+  // Centered gentle winding wave on desktop
+  const segments = 24;
+  let d = `M ${centerX} 0`;
+  const segmentHeight = totalHeight / segments;
+
   for (let i = 1; i <= segments; i++) {
-    const y = (height / segments) * i;
-    const prevY = (height / segments) * (i - 1);
+    const y = segmentHeight * i;
+    const prevY = segmentHeight * (i - 1);
     const midY = (y + prevY) / 2;
-    const offset = i % 2 === 0 ? 30 : -30;
-    
-    // Check if mobile (path is on left)
-    if(window.innerWidth < 768) {
-       d += \` L \${width/2} \${y}\`; // Straight line on mobile
-    } else {
-       d += \` Q \${width/2 + offset} \${midY}, \${width/2} \${y}\`;
-    }
+    // Alternate gentle horizontal oscillation
+    const offset = i % 2 === 0 ? 28 : -28;
+    d += ` Q ${centerX + offset} ${midY}, ${centerX} ${y}`;
   }
 
   pathGlow.setAttribute('d', d);
   pathCore.setAttribute('d', d);
+}
+
+/* ==========================================================================
+   6. CONTACT FORM HANDLING
+   ========================================================================== */
+function initContactForm() {
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+
+  const endpoint = portfolioData.meta.formspreeEndpoint;
+  if (endpoint && endpoint.trim() !== "") {
+    form.action = endpoint;
+    form.method = "POST";
+  } else {
+    // Client-side fallback to formatted mailto
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('form-name').value.trim();
+      const email = document.getElementById('form-email').value.trim();
+      const message = document.getElementById('form-message').value.trim();
+
+      if (!name || !email || !message) {
+        alert("TRANSMISSION ERROR: Please complete all input fields.");
+        return;
+      }
+
+      const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+      const body = encodeURIComponent(
+        `Cognitive ID / Name: ${name}\nReturn Frequency / Email: ${email}\n\nTransmission Payload:\n${message}`
+      );
+
+      window.location.href = `mailto:${portfolioData.meta.email}?subject=${subject}&body=${body}`;
+    });
+  }
+}
+
+/* ==========================================================================
+   7. UTILITY: DEBOUNCE
+   ========================================================================== */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }

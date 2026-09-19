@@ -3,256 +3,504 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mithra Dharshini R - Retro Futurism Portfolio</title>
-  <meta name="description" content="BBA student exploring the space where business, technology and creativity meet.">
+  <title>Mithra Dharshini R | Retro Futurism Portfolio</title>
+  <meta name="description" content="BBA student exploring the space where business, technology and creativity meet. Specialized in Marketing, Retail Management, Digital Strategy & Entrepreneurship.">
   
-  <!-- SEO Basics -->
-  <meta property="og:title" content="Mithra Dharshini R - Portfolio">
-  <meta property="og:description" content="BBA student exploring the space where business, technology and creativity meet.">
+  <!-- SEO & Open Graph Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mithra Dharshini R | Retro Futurism Portfolio">
+  <meta property="og:description" content="BBA student exploring the space where business, technology and creativity meet. Specialized in Marketing, Retail Management, Digital Strategy & Entrepreneurship.">
+  <meta property="og:url" content="https://mithradharshini.github.io/mithradharshini-portfolio/">
+  <meta name="theme-color" content="#12062B">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   
   <!-- Google Fonts: Orbitron, Space Mono, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   
-  <!-- Icons (Lucide) -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Core CSS -->
+  <!-- Core Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="retro-theme">
+<body class="retro-theme" id="top">
 
-  <!-- Boot Loader -->
-  <div id="boot-loader" class="boot-loader">
+  <!-- ACCESSIBILITY: Skip to main content -->
+  <a href="#main-content" class="skip-link mono-text">SKIP TO CONTENT [ENTER]</a>
+
+  <!-- Boot-up Loader -->
+  <aside id="boot-loader" class="boot-loader" aria-label="System Initializing Screen">
     <div class="boot-content">
-      <p class="mono-text">INITIALIZING MITHRA.OS ... <span id="boot-progress">0</span>%</p>
-      <div class="boot-bar-container">
+      <div class="boot-header mono-text">
+        <span class="status-led led-cyan"></span>
+        <span>MITHRA.OS // BIOS KERNEL V4.8</span>
+      </div>
+      <p class="mono-text boot-label">INITIALIZING MITHRA.OS ... <span id="boot-progress">0</span>%</p>
+      <div class="boot-bar-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="boot-bar-aria">
         <div id="boot-bar" class="boot-bar"></div>
       </div>
+      <div class="boot-subtext mono-text">
+        <span>MOUNTING CORE MODULES...</span>
+        <button id="skip-boot-btn" class="skip-boot-btn" type="button">SKIP [ESC]</button>
+      </div>
     </div>
-  </div>
+  </aside>
 
-  <!-- CRT Effect Overlay -->
-  <div id="crt-overlay" class="crt-overlay"></div>
+  <!-- CRT Scanlines & Screen Vignette Overlay -->
+  <div id="crt-overlay" class="crt-overlay" aria-hidden="true"></div>
 
-  <!-- HUD Navigation -->
-  <nav class="hud-nav">
+  <!-- HUD Navigation Bar -->
+  <header class="hud-nav" role="banner">
     <div class="nav-container">
-      <div class="nav-brand mono-text">SYS.MITHRA // V1.0</div>
-      <div class="nav-links">
-        <a href="#about" class="mono-text">01.ABOUT</a>
-        <a href="#protosem" class="mono-text">02.PROTOSEM</a>
-        <a href="#education" class="mono-text">03.EDU</a>
-      </div>
+      <a href="#top" class="nav-brand mono-text" aria-label="Mithra Dharshini Portfolio Home">
+        <span class="brand-bracket">[</span>SYS.MITHRA<span class="brand-bracket">]</span>
+        <span class="status-led led-green" title="Systems Active"></span>
+      </a>
+      
+      <nav class="nav-links" aria-label="Primary Mission Navigation">
+        <a href="#about" class="mono-text nav-link" data-section="about">01.ABOUT</a>
+        <a href="#experience" class="mono-text nav-link" data-section="experience">02.MISSION LOG</a>
+        <a href="#protosem" class="mono-text nav-link" data-section="protosem">03.PROTOSEM</a>
+        <a href="#leadership" class="mono-text nav-link" data-section="leadership">04.CREW</a>
+        <a href="#certifications" class="mono-text nav-link" data-section="certifications">05.HONORS</a>
+        <a href="#education" class="mono-text nav-link" data-section="education">06.FLIGHT RECORD</a>
+      </nav>
+
       <div class="nav-controls">
-        <button id="toggle-effects" class="hud-btn mono-text" aria-label="Toggle visual effects" title="Reduce Effects">FX:ON</button>
-        <a href="#contact" class="pill-btn neon-cyan mono-text">CONTACT</a>
+        <button id="toggle-effects" class="hud-btn mono-text" aria-label="Toggle Retro Visual Effects" title="Toggle Scanlines & Grid Animation">
+          <i data-lucide="sparkles" class="icon-sm"></i>
+          <span id="fx-text">FX: ON</span>
+        </button>
+        <a href="#contact" class="pill-btn neon-cyan mono-text nav-contact-btn">
+          <span>CONTACT</span>
+          <i data-lucide="radio" class="icon-sm"></i>
+        </a>
       </div>
     </div>
-    <!-- Scroll Progress Fuel Gauge -->
-    <div class="scroll-fuel-container">
+    
+    <!-- Fuel Gauge Scroll Progress Bar -->
+    <div class="scroll-fuel-container" role="progressbar" aria-label="Page scroll progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
       <div id="scroll-fuel" class="scroll-fuel"></div>
     </div>
-  </nav>
+  </header>
 
-  <!-- Animated Hero Backdrop (CSS) -->
+  <!-- Animated Hero Backdrop (CSS Perspective Grid + Striped Sunset Sun + Starfield) -->
   <div class="hero-backdrop" aria-hidden="true">
-    <div class="stars"></div>
-    <div class="sun">
-      <div class="sun-stripes"></div>
+    <div class="star-field"></div>
+    <div class="sun-wrapper">
+      <div class="sun">
+        <div class="sun-stripes"></div>
+      </div>
     </div>
+    <div class="grid-horizon"></div>
     <div class="grid-floor"></div>
+    <div class="radar-reticle"></div>
   </div>
 
-  <main>
-    <!-- SECTION 1: HERO -->
-    <section id="hero" class="hero-section scroll-reveal">
+  <main id="main-content">
+    
+    <!-- ====================================================================
+         SECTION 1: HERO (MISSION CONTROL DISPLAY)
+         ==================================================================== -->
+    <section id="hero" class="hero-section">
       <div class="container hero-content">
+        
+        <!-- Telemetry HUD Readout Chips -->
         <div class="hud-readouts mono-text">
-          <span class="hud-tag">LOC: <span id="hero-loc"></span></span>
-          <span class="hud-tag status-tag">STATUS: <span id="hero-status"></span></span>
-          <span class="hud-tag">MISSION: <span id="hero-mission"></span></span>
+          <div class="hud-tag">
+            <span class="status-led led-cyan"></span>
+            <span>LOC: <strong id="hero-loc">COIMBATORE, IN</strong></span>
+          </div>
+          <div class="hud-tag status-active">
+            <span class="status-led led-magenta pulse"></span>
+            <span>STATUS: <strong id="hero-status">OPEN TO INTERNSHIPS</strong></span>
+          </div>
+          <div class="hud-tag">
+            <span class="status-led led-yellow"></span>
+            <span>MISSION: <strong id="hero-mission">PRICE PROTOSEM (ONGOING)</strong></span>
+          </div>
         </div>
-        <h1 id="hero-name" class="display-text chrome-text"></h1>
-        <p id="hero-tagline" class="body-text"></p>
+
+        <!-- Name with Metallic Chrome Bevel & Specular Gradient -->
+        <h1 id="hero-name" class="hero-title display-text chrome-text">MITHRA DHARSHINI R</h1>
+        
+        <!-- Tagline -->
+        <p id="hero-tagline" class="hero-tagline body-text">
+          BBA student exploring the space where business, technology and creativity meet.
+        </p>
+
+        <!-- CTA Action Buttons -->
         <div class="hero-actions">
-          <a href="#protosem" class="pill-btn neon-magenta mono-text">EXPLORE MY WORK</a>
-          <a href="assets/resume.pdf" target="_blank" class="pill-btn neon-orange mono-text">DOWNLOAD RESUME</a>
+          <a href="#protosem" class="pill-btn neon-magenta mono-text glow-btn">
+            <i data-lucide="compass" class="icon-btn"></i>
+            <span>EXPLORE MY WORK</span>
+          </a>
+          <a href="assets/resume.html" target="_blank" rel="noopener" class="pill-btn neon-orange mono-text glow-btn">
+            <i data-lucide="file-text" class="icon-btn"></i>
+            <span>DOWNLOAD RESUME</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Retro Futuristic Marquee Ticker Strip of Focus Disciplines -->
+      <div class="ticker-wrapper" aria-hidden="true">
+        <div class="ticker-strip mono-text" id="ticker-strip">
+          <!-- Populated dynamically by main.js -->
         </div>
       </div>
     </section>
 
-    <!-- SECTION 2: ABOUT -->
-    <section id="about" class="container scroll-reveal">
+
+    <!-- ====================================================================
+         SECTION 2: ABOUT (SYSTEM MODULES)
+         ==================================================================== -->
+    <section id="about" class="section-container scroll-reveal" aria-labelledby="about-heading">
       <div class="control-panel">
         <div class="panel-header mono-text">
-          <span>SEC 01 // ABOUT</span>
-          <i data-lucide="user"></i>
+          <div class="header-left">
+            <span class="panel-screws"><i class="screw"></i></span>
+            <span class="panel-code">SEC 01 // ABOUT</span>
+          </div>
+          <div class="header-right">
+            <span class="status-led led-cyan"></span>
+            <span class="panel-badge">SYS.PROFILE</span>
+            <i data-lucide="user-check" class="icon-sm"></i>
+          </div>
         </div>
+        
         <div class="panel-body grid-2-col">
-          <div class="about-summary">
-            <p id="about-summary-text" class="body-text"></p>
+          <div class="about-summary-col">
+            <h2 id="about-heading" class="panel-section-title display-text neon-cyan-text">SYSTEM PROFILE</h2>
+            <div class="panel-meta-line mono-text text-sm muted-text mb-4">
+              <span>CANDIDATE // BBA 2025-2028</span> • <span>KCLAS COIMBATORE</span>
+            </div>
+            <p id="about-summary-text" class="body-text summary-highlight">
+              <!-- Injected from content.js -->
+            </p>
+            <div class="profile-telemetry mono-text mt-4">
+              <div class="telemetry-item">
+                <span class="label">CORE TRACK:</span>
+                <span class="val neon-yellow-text">Marketing & Phygital Retail</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="label">APPROACH:</span>
+                <span class="val neon-cyan-text">Analytical • Creative • Operational</span>
+              </div>
+            </div>
           </div>
-          <div class="about-skills" id="about-skills-container">
-            <!-- Populated by JS -->
+
+          <div class="about-modules-col">
+            <h3 class="panel-subsection-title mono-text neon-magenta-text">SYSTEM CAPABILITY MODULES</h3>
+            <div class="modules-stack" id="about-skills-container">
+              <!-- Populated by main.js with structured level-less module cards -->
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 3: EXPERIENCE -->
-    <section id="experience" class="container scroll-reveal">
+
+    <!-- ====================================================================
+         SECTION 3: EXPERIENCE (MISSION LOG: OPERATIONS & FINANCE)
+         ==================================================================== -->
+    <section id="experience" class="section-container scroll-reveal" aria-labelledby="experience-heading">
       <div class="control-panel">
         <div class="panel-header mono-text">
-          <span>SEC 02 // MISSION LOG (EXPERIENCE)</span>
-          <i data-lucide="briefcase"></i>
+          <div class="header-left">
+            <span class="panel-screws"><i class="screw"></i></span>
+            <span class="panel-code">SEC 02 // MISSION LOG (EXPERIENCE)</span>
+          </div>
+          <div class="header-right">
+            <span class="status-led led-green"></span>
+            <span class="panel-badge">FIELD.OPERATIONS</span>
+            <i data-lucide="briefcase" class="icon-sm"></i>
+          </div>
         </div>
-        <div class="panel-body" id="experience-container">
-          <!-- Populated by JS -->
+
+        <div class="panel-body">
+          <div class="mission-log-container" id="experience-container">
+            <!-- Populated dynamically by main.js -->
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 4: PROTOSEM (FLAGSHIP) -->
-    <section id="protosem" class="container scroll-reveal">
+
+    <!-- ====================================================================
+         SECTION 4: PRICE PROTOSEM (FLAGSHIP 20-WEEK INNOVATION HIGHWAY)
+         ==================================================================== -->
+    <section id="protosem" class="section-container scroll-reveal" aria-labelledby="protosem-heading">
       <div class="control-panel protosem-panel">
+        
+        <!-- Top Telemetry Strip -->
         <div class="panel-header mono-text">
-          <span>PROTOSEM // INNOVATION FELLOWSHIP</span>
-          <span>20-WEEK FIELD JOURNAL</span>
+          <div class="header-left">
+            <span class="panel-screws"><i class="screw"></i></span>
+            <span>PROTOSEM // INNOVATION FELLOWSHIP</span>
+          </div>
+          <div class="header-right">
+            <span class="status-led led-magenta pulse"></span>
+            <span>20-WEEK FIELD JOURNAL</span>
+          </div>
         </div>
+
         <div class="panel-body">
-          <div class="protosem-intro">
-            <span class="mono-text tag-eyebrow">PROGRAMME</span>
-            <h2 id="protosem-title" class="display-text"></h2>
-            <h3 id="protosem-role" class="mono-text neon-cyan-text"></h3>
-            <p id="protosem-subtitle" class="mono-text muted-text"></p>
-            <div class="protosem-meta">
-              <span class="status-tag neon-magenta mono-text" id="protosem-status"></span>
+          
+          <!-- Intro Card -->
+          <div class="protosem-intro-card">
+            <div class="intro-header-row">
+              <div>
+                <span class="mono-text tag-eyebrow neon-cyan-text">PROGRAMME</span>
+                <h2 id="protosem-heading" class="display-text chrome-text protosem-title">PRICE ProtoSem</h2>
+                <h3 id="protosem-role" class="mono-text neon-magenta-text role-line">Innovation Engineer Trainee</h3>
+                <p id="protosem-programme-line" class="mono-text programme-line text-sm muted-text"></p>
+              </div>
+
+              <div class="protosem-meta-box mono-text" id="protosem-meta-box">
+                <!-- Meta tags injected from content.js -->
+              </div>
             </div>
-            
-            <div class="protosem-desc grid-2-col">
+
+            <!-- Two Column Description -->
+            <div class="protosem-desc-grid grid-2-col mt-4">
               <p id="protosem-desc1" class="body-text"></p>
               <p id="protosem-desc2" class="body-text"></p>
             </div>
 
-            <div class="protosem-disciplines">
-              <span class="mono-text tag-eyebrow">PROGRAMME DISCIPLINES & FOCUS AREAS</span>
-              <div id="protosem-tags" class="tag-cloud"></div>
+            <!-- Discipline Tags -->
+            <div class="protosem-disciplines-block mt-4">
+              <span class="mono-text disciplines-label text-sm">PROGRAMME DISCIPLINES & FOCUS AREAS</span>
+              <div id="protosem-tags" class="tag-cloud mt-2" role="list">
+                <!-- Populated by main.js -->
+              </div>
             </div>
           </div>
 
-          <!-- Timeline Controls -->
-          <div class="timeline-header">
-            <div class="timeline-title display-text">The 20-Week Innovation Highway</div>
-            <div class="timeline-filters mono-text" id="timeline-filters">
-              <button class="filter-btn active" data-phase="all">ALL (20)</button>
-              <button class="filter-btn" data-phase="1">PHASE 01</button>
-              <button class="filter-btn" data-phase="2">PHASE 02</button>
-              <button class="filter-btn" data-phase="3">PHASE 03</button>
-              <button class="filter-btn" data-phase="4">PHASE 04</button>
+          <!-- Timeline Header Row & Filter Buttons -->
+          <div class="timeline-header-row mt-6">
+            <div class="timeline-titles">
+              <h3 class="display-text highway-title">The 20-Week Innovation Highway</h3>
+              <p class="mono-text text-sm muted-text" id="highway-subtitle"></p>
+            </div>
+
+            <div class="timeline-filters-bar mono-text" id="timeline-filters" role="tablist" aria-label="Innovation Highway Phase Filters">
+              <button class="filter-btn active" data-phase="all" role="tab" aria-selected="true" aria-controls="timeline-highway">
+                ALL <span class="filter-count">(20)</span>
+              </button>
+              <button class="filter-btn" data-phase="1" role="tab" aria-selected="false" aria-controls="timeline-highway">
+                PHASE 01 <span class="filter-count">(5)</span>
+              </button>
+              <button class="filter-btn" data-phase="2" role="tab" aria-selected="false" aria-controls="timeline-highway">
+                PHASE 02 <span class="filter-count">(5)</span>
+              </button>
+              <button class="filter-btn" data-phase="3" role="tab" aria-selected="false" aria-controls="timeline-highway">
+                PHASE 03 <span class="filter-count">(5)</span>
+              </button>
+              <button class="filter-btn" data-phase="4" role="tab" aria-selected="false" aria-controls="timeline-highway">
+                PHASE 04 <span class="filter-count">(5)</span>
+              </button>
             </div>
           </div>
 
-          <!-- The SVG Winding Timeline -->
-          <div class="timeline-container">
-            <svg id="timeline-svg" class="timeline-svg" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path id="timeline-path-glow" fill="none" stroke="var(--neon-magenta)" stroke-width="6" stroke-linecap="round" />
-              <path id="timeline-path-core" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
-            </svg>
+          <!-- Glowing Curved SVG Highway & 20-Week Alternating Nodes -->
+          <div class="timeline-highway-container" id="timeline-highway">
             
-            <div id="timeline-nodes-container" class="timeline-nodes-wrapper">
-              <!-- Dynamically populated by JS -->
+            <!-- SVG Highway Trail -->
+            <svg id="timeline-svg" class="timeline-svg" aria-hidden="true" preserveAspectRatio="none">
+              <!-- Outer glowing trail -->
+              <path id="timeline-path-glow" class="path-glow" fill="none" stroke-linecap="round" />
+              <!-- Core neon line -->
+              <path id="timeline-path-core" class="path-core" fill="none" stroke-linecap="round" />
+            </svg>
+
+            <!-- 20 Interactive Milestone Week Cards with Phase Header Milestone Blocks -->
+            <div id="timeline-nodes-container" class="timeline-nodes-container" role="feed" aria-label="20-Week Innovation Highway Milestones">
+              <!-- Dynamically populated from content.js by main.js -->
             </div>
+
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- SECTION 5: LEADERSHIP -->
-    <section id="leadership" class="container scroll-reveal">
-      <div class="section-title mono-text">SEC 03 // LEADERSHIP & EXTRACURRICULARS</div>
+
+    <!-- ====================================================================
+         SECTION 5: LEADERSHIP & EXTRACURRICULARS (CREW BADGES)
+         ==================================================================== -->
+    <section id="leadership" class="section-container scroll-reveal" aria-labelledby="leadership-heading">
+      <div class="section-header-bar mono-text">
+        <div class="section-code-tag">SEC 04 // LEADERSHIP & EXTRACURRICULARS</div>
+        <div class="section-leds"><span class="status-led led-magenta"></span> CREW COMMAND</div>
+      </div>
+      <h2 id="leadership-heading" class="display-text section-title-display">COGNITIVE MISSIONS & ROLES</h2>
+
       <div class="grid-3-col" id="leadership-container">
-        <!-- Populated by JS -->
+        <!-- 3 Crew Badges injected from content.js -->
       </div>
     </section>
 
-    <!-- SECTION 6: CERTIFICATIONS -->
-    <section id="certifications" class="container scroll-reveal">
-      <div class="section-title mono-text">SEC 04 // CERTIFICATIONS</div>
+
+    <!-- ====================================================================
+         SECTION 6: CERTIFICATIONS & ACHIEVEMENTS (HONORS)
+         ==================================================================== -->
+    <section id="certifications" class="section-container scroll-reveal" aria-labelledby="certifications-heading">
+      <div class="section-header-bar mono-text">
+        <div class="section-code-tag">SEC 05 // CERTIFICATIONS & ACHIEVEMENTS</div>
+        <div class="section-leds"><span class="status-led led-yellow"></span> ACCREDITATIONS</div>
+      </div>
+      <h2 id="certifications-heading" class="display-text section-title-display">HONORS & MERIT MEDALS</h2>
+
       <div class="grid-2-col" id="certifications-container">
-        <!-- Populated by JS -->
+        <!-- 2 Medal Cards injected from content.js -->
       </div>
     </section>
 
-    <!-- SECTION 7: EDUCATION -->
-    <section id="education" class="container scroll-reveal">
-      <div class="control-panel">
-         <div class="panel-header mono-text">
-          <span>SEC 05 // FLIGHT RECORD (EDUCATION)</span>
-          <i data-lucide="graduation-cap"></i>
-        </div>
-        <div class="panel-body">
-          <div class="grid-3-col" id="education-container">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- SECTION 8: CONTACT -->
-    <section id="contact" class="container scroll-reveal">
+    <!-- ====================================================================
+         SECTION 7: EDUCATION (FLIGHT RECORD)
+         ==================================================================== -->
+    <section id="education" class="section-container scroll-reveal" aria-labelledby="education-heading">
       <div class="control-panel">
         <div class="panel-header mono-text">
-          <span>SEC 06 // OPEN A CHANNEL</span>
-          <i data-lucide="radio"></i>
-        </div>
-        <div class="panel-body grid-2-col">
-          <div class="contact-info">
-            <p id="contact-text" class="body-text"></p>
-            <ul class="contact-links mono-text">
-              <li><i data-lucide="map-pin"></i> <span id="contact-loc"></span></li>
-              <li><i data-lucide="mail"></i> <a href="" id="contact-email"></a></li>
-              <li><i data-lucide="linkedin"></i> <a href="" id="contact-linkedin" target="_blank"></a></li>
-            </ul>
+          <div class="header-left">
+            <span class="panel-screws"><i class="screw"></i></span>
+            <span>SEC 06 // FLIGHT RECORD (EDUCATION)</span>
           </div>
-          <div class="contact-form-wrapper">
-            <form id="contact-form" class="comm-panel">
-              <div class="form-group">
-                <label for="name" class="mono-text">NAME_</label>
-                <input type="text" id="name" required class="hud-input">
+          <div class="header-right">
+            <span class="status-led led-cyan"></span>
+            <span class="panel-badge">ACADEMIC.TELEMETRY</span>
+            <i data-lucide="graduation-cap" class="icon-sm"></i>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <h2 id="education-heading" class="display-text neon-cyan-text mb-4" style="font-size: 1.5rem;">ACADEMIC TRAJECTORY</h2>
+          <div class="grid-3-col" id="education-container">
+            <!-- 3 Educational Flight Records injected from content.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SECTION 8: CONTACT ("OPEN A CHANNEL")
+         ==================================================================== -->
+    <section id="contact" class="section-container scroll-reveal" aria-labelledby="contact-heading">
+      <div class="control-panel">
+        <div class="panel-header mono-text">
+          <div class="header-left">
+            <span class="panel-screws"><i class="screw"></i></span>
+            <span>SEC 07 // OPEN A CHANNEL</span>
+          </div>
+          <div class="header-right">
+            <span class="status-led led-cyan pulse"></span>
+            <span class="panel-badge">COMMS.ONLINE</span>
+            <i data-lucide="radio" class="icon-sm"></i>
+          </div>
+        </div>
+
+        <div class="panel-body grid-2-col">
+          
+          <div class="contact-info-panel">
+            <h2 id="contact-heading" class="display-text neon-magenta-text" style="font-size: 1.75rem;">COMMUNICATION RELAY</h2>
+            <p id="contact-subtext" class="body-text text-muted my-3"></p>
+
+            <div class="telemetry-block mono-text mt-4">
+              <div class="channel-row">
+                <i data-lucide="map-pin" class="icon-sm neon-cyan-text"></i>
+                <span class="channel-label">LOCATION:</span>
+                <span id="contact-location" class="channel-value"></span>
               </div>
-              <div class="form-group">
-                <label for="email" class="mono-text">EMAIL_</label>
-                <input type="email" id="email" required class="hud-input">
+              <div class="channel-row">
+                <i data-lucide="mail" class="icon-sm neon-magenta-text"></i>
+                <span class="channel-label">EMAIL:</span>
+                <a href="" id="contact-email" class="channel-value channel-link"></a>
               </div>
-              <div class="form-group">
-                <label for="message" class="mono-text">TRANSMISSION_</label>
-                <textarea id="message" required rows="4" class="hud-input"></textarea>
+              <div class="channel-row">
+                <i data-lucide="linkedin" class="icon-sm neon-orange-text"></i>
+                <span class="channel-label">LINKEDIN:</span>
+                <a href="" id="contact-linkedin" target="_blank" rel="noopener" class="channel-value channel-link"></a>
               </div>
-              <button type="submit" class="pill-btn neon-cyan mono-text w-full">SEND TRANSMISSION</button>
+            </div>
+
+            <div class="status-box mt-4 mono-text">
+              <span class="status-led led-green"></span>
+              <span>AVAILABLE FOR SUMMER / ACADEMIC INTERNSHIPS</span>
+            </div>
+          </div>
+
+          <div class="contact-form-panel">
+            <!-- Terminal Comm Panel Form -->
+            <form id="contact-form" class="comm-terminal-panel" novalidate>
+              <div class="terminal-prompt mono-text mb-3">
+                <span class="prompt-arrow">&gt;</span> <span id="terminal-prompt-text">TRANSMIT_TO // MITHRA.OS</span>
+              </div>
+
+              <div class="form-group">
+                <label for="form-name" class="mono-text">COGNITIVE_ID / NAME_</label>
+                <input type="text" id="form-name" name="name" required placeholder="Enter your name" class="hud-input">
+              </div>
+
+              <div class="form-group">
+                <label for="form-email" class="mono-text">RETURN_FREQUENCY / EMAIL_</label>
+                <input type="email" id="form-email" name="email" required placeholder="name@domain.com" class="hud-input">
+              </div>
+
+              <div class="form-group">
+                <label for="form-message" class="mono-text">TRANSMISSION_PAYLOAD_</label>
+                <textarea id="form-message" name="message" required rows="4" placeholder="Type your message / collaboration proposal..." class="hud-input"></textarea>
+              </div>
+
+              <button type="submit" id="form-submit-btn" class="pill-btn neon-cyan mono-text w-full glow-btn">
+                <i data-lucide="send" class="icon-btn"></i>
+                <span>TRANSMIT MESSAGE</span>
+              </button>
+
+              <p class="form-fallback-note mono-text text-sm muted-text mt-2 text-center">
+                Direct mailto fallback active • Secure transmissions
+              </p>
             </form>
           </div>
+
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- FOOTER -->
-  <footer class="footer container">
-    <div class="mono-text">MITHRA DHARSHINI R // <span id="footer-year">2026</span></div>
-    <a href="#top" class="pill-btn neon-magenta mono-text icon-only" title="Back to top">
-      <i data-lucide="rocket"></i>
-    </a>
+
+  <!-- ====================================================================
+       FOOTER & BACK TO TOP
+       ==================================================================== -->
+  <footer class="footer-container container mono-text" role="contentinfo">
+    <div class="footer-left">
+      <span>MITHRA DHARSHINI R // 2026</span>
+      <span class="footer-sep">•</span>
+      <span class="text-sm muted-text">DESIGNED IN RETRO FUTURISM</span>
+    </div>
+
+    <div class="footer-right">
+      <a href="#top" class="pill-btn neon-magenta icon-only glow-btn" aria-label="Launch back to top of page" title="Launch Back to Top">
+        <i data-lucide="rocket" class="icon-rocket"></i>
+      </a>
+    </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Scripts: Single source of truth followed by main logic -->
   <script src="js/content.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
+    // Initialize Lucide Icons after DOM is ready
+    if (window.lucide) {
+      lucide.createIcons();
+    }
   </script>
 </body>
 </html>
